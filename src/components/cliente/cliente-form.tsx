@@ -41,17 +41,21 @@ const clienteSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   tipo: z.enum(["pessoa_fisica", "pessoa_juridica"]),
   documento: z.string().min(1, "Documento é obrigatório"),
-  email: z.string().email("Email inválido").optional().or(z.literal("")),
-  telefone: z.string().optional().or(z.literal("")),
-  endereco: z.string().optional().or(z.literal("")),
-  cidade: z.string().optional().or(z.literal("")),
-  estado: z.string().optional().or(z.literal("")),
-  cep: z.string().optional().or(z.literal("")),
-  data_abertura: z.string().optional().or(z.literal("")),
-  natureza_juridica: z.string().optional().or(z.literal("")),
-  atividade_principal: z.string().optional().or(z.literal("")),
+  email: z.union([
+    z.string().email("Email inválido"),
+    z.string().length(0),
+    z.null()
+  ]).optional(),
+  telefone: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  endereco: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  cidade: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  estado: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  cep: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  data_abertura: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  natureza_juridica: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  atividade_principal: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
   simples_nacional: z.enum(["sim", "nao"]).optional().nullable(),
-  observacoes: z.string().optional().or(z.literal("")),
+  observacoes: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
 });
 
 type ClienteFormValues = z.infer<typeof clienteSchema>;
@@ -375,7 +379,15 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="email@exemplo.com" type="email" {...field} />
+                      <Input 
+                        placeholder="email@exemplo.com" 
+                        type="email" 
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

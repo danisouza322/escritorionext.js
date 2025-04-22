@@ -11,7 +11,11 @@ const clienteSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   tipo: z.enum(["pessoa_fisica", "pessoa_juridica"]),
   documento: z.string().min(1, "Documento é obrigatório"),
-  email: z.string().email("Email inválido").optional().nullable(),
+  email: z.union([
+    z.string().email("Email inválido"),
+    z.string().length(0),
+    z.null()
+  ]).optional(),
   telefone: z.string().optional().nullable(),
   endereco: z.string().optional().nullable(),
   cidade: z.string().optional().nullable(),
