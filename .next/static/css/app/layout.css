@@ -1119,6 +1119,9 @@ video {
 .border-border {
   border-color: hsl(var(--border));
 }
+.border-current {
+  border-color: currentColor;
+}
 .border-destructive {
   border-color: hsl(var(--destructive));
 }

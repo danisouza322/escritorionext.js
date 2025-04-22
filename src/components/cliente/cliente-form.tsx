@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Search } from "lucide-react";
 
 // Esquema de validação do cliente
 const clienteSchema = z.object({
@@ -58,6 +59,7 @@ interface ClienteFormProps {
 export default function ClienteForm({ children, cliente }: ClienteFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConsultandoCNPJ, setIsConsultandoCNPJ] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -90,6 +92,54 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
     resolver: zodResolver(clienteSchema),
     defaultValues,
   });
+
+  // Função para consultar CNPJ
+  async function consultarCNPJ(documento: string) {
+    if (!documento || documento.length < 14) {
+      toast({
+        title: "CNPJ Inválido",
+        description: "Por favor, informe um CNPJ válido",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsConsultandoCNPJ(true);
+    
+    try {
+      const response = await fetch(`/api/cnpja?documento=${encodeURIComponent(documento)}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao consultar CNPJ");
+      }
+      
+      const data = await response.json();
+      
+      // Preencher os campos do formulário com os dados retornados
+      form.setValue("nome", data.nome);
+      form.setValue("email", data.email || "");
+      form.setValue("telefone", data.telefone || "");
+      form.setValue("endereco", data.endereco || "");
+      form.setValue("cidade", data.cidade || "");
+      form.setValue("estado", data.estado || "");
+      form.setValue("cep", data.cep || "");
+      
+      toast({
+        title: "CNPJ Consultado",
+        description: "Dados preenchidos com sucesso",
+      });
+    } catch (error) {
+      console.error("Erro ao consultar CNPJ:", error);
+      toast({
+        title: "Erro na consulta",
+        description: error instanceof Error ? error.message : "Erro ao consultar CNPJ",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConsultandoCNPJ(false);
+    }
+  }
 
   async function onSubmit(data: ClienteFormValues) {
     setIsSubmitting(true);
@@ -209,9 +259,28 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{form.watch("tipo") === "pessoa_fisica" ? "CPF" : "CNPJ"}</FormLabel>
-                    <FormControl>
-                      <Input placeholder={form.watch("tipo") === "pessoa_fisica" ? "000.000.000-00" : "00.000.000/0000-00"} {...field} />
-                    </FormControl>
+                    <div className="flex gap-2">
+                      <FormControl>
+                        <Input placeholder={form.watch("tipo") === "pessoa_fisica" ? "000.000.000-00" : "00.000.000/0000-00"} {...field} />
+                      </FormControl>
+                      
+                      {form.watch("tipo") === "pessoa_juridica" && (
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="icon"
+                          onClick={() => consultarCNPJ(field.value)}
+                          disabled={isConsultandoCNPJ || !field.value}
+                          title="Consultar CNPJ"
+                        >
+                          {isConsultandoCNPJ ? (
+                            <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                          ) : (
+                            <Search className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
