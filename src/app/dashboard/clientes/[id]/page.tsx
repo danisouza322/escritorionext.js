@@ -88,13 +88,12 @@ async function getData(clienteIdParam: string) {
   };
 }
 
-export default async function ClienteDetalhesPage(props: PageProps) {
-  // Buscamos os dados usando a função auxiliar diretamente com o objeto params
-  const params = props.params;
-  const idParam = params ? String(params.id) : '';
+export default async function ClienteDetalhesPage({ params }: { params: { id: string } }) {
+  // No Next.js 14, os parâmetros de rota são disponibilizados diretamente no objeto params
+  // e estamos acessando-os de forma segura já que fizemos a tipagem correta acima
   
   // Buscamos os dados usando a função auxiliar
-  const data = await getData(idParam);
+  const data = await getData(params.id);
   
   if ('redirect' in data) {
     redirect(data.redirect);

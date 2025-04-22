@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { clientes } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import ClienteList from "@/components/cliente/cliente-list";
 import ClienteFormButton from "@/components/cliente/cliente-form-button";
 import { Cliente } from "@/types";
@@ -17,9 +17,12 @@ export default async function ClientesPage() {
 
   const contabilidadeId = Number(session.user.contabilidadeId);
   
-  // Buscar clientes
+  // Buscar apenas clientes ativos
   const clientesList = await db.query.clientes.findMany({
-    where: eq(clientes.contabilidadeId, contabilidadeId),
+    where: and(
+      eq(clientes.contabilidadeId, contabilidadeId),
+      eq(clientes.ativo, true)
+    ),
     orderBy: [desc(clientes.dataCriacao)],
   });
   

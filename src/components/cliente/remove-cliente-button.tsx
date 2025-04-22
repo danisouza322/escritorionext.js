@@ -33,11 +33,15 @@ export default function RemoveClienteButton({ id }: RemoveClienteButtonProps) {
 
       const response = await fetch(`/api/clientes/${id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        }
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erro ao desativar cliente");
+        throw new Error(data.error || "Erro ao desativar cliente");
       }
 
       toast({
@@ -48,9 +52,9 @@ export default function RemoveClienteButton({ id }: RemoveClienteButtonProps) {
       // Fechar o modal
       setIsOpen(false);
       
-      // Redirecionar para a lista de clientes
-      router.push("/dashboard/clientes");
-      router.refresh();
+      // Redirecionar e atualizar a UI
+      router.refresh(); // Primeiro atualizamos para garantir que os dados reflitam a mudança
+      router.push("/dashboard/clientes"); // Depois redirecionamos
     } catch (error) {
       console.error("Erro ao desativar cliente:", error);
       toast({

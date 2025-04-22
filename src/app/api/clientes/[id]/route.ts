@@ -8,7 +8,7 @@ import { eq, and } from "drizzle-orm";
 // GET /api/clientes/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
 
@@ -17,9 +17,8 @@ export async function GET(
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
-  // Extrair o id de forma segura, convertendo para string primeiro
-  const idParam = String(params.id);
-  const id = Number(idParam);
+  // Acessar o ID a partir do contexto de forma segura
+  const id = Number(context.params.id);
 
   if (isNaN(id)) {
     return NextResponse.json(
@@ -56,7 +55,7 @@ export async function GET(
 // DELETE /api/clientes/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
 
@@ -65,9 +64,8 @@ export async function DELETE(
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
-  // Extrair o id de forma segura, convertendo para string primeiro
-  const idParam = String(params.id);
-  const id = Number(idParam);
+  // Acessar o ID a partir do contexto de forma segura
+  const id = Number(context.params.id);
 
   if (isNaN(id)) {
     return NextResponse.json(
