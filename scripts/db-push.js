@@ -166,6 +166,29 @@ async function main() {
       data_atualizacao TIMESTAMP DEFAULT NOW()
     `);
     
+    await createTableIfNotExists(pool, 'observacoes_tarefas', `
+      id SERIAL PRIMARY KEY,
+      tarefa_id INTEGER NOT NULL REFERENCES tarefas(id),
+      usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+      texto TEXT NOT NULL,
+      ativo BOOLEAN DEFAULT TRUE,
+      data_criacao TIMESTAMP DEFAULT NOW(),
+      data_atualizacao TIMESTAMP DEFAULT NOW()
+    `);
+
+    await createTableIfNotExists(pool, 'arquivos_tarefas', `
+      id SERIAL PRIMARY KEY,
+      tarefa_id INTEGER NOT NULL REFERENCES tarefas(id),
+      usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+      nome VARCHAR(255) NOT NULL,
+      tipo VARCHAR(255),
+      tamanho INTEGER,
+      caminho TEXT NOT NULL,
+      ativo BOOLEAN DEFAULT TRUE,
+      data_criacao TIMESTAMP DEFAULT NOW(),
+      data_atualizacao TIMESTAMP DEFAULT NOW()
+    `);
+    
     // Adicionar colunas à tabela clientes se ela já existir
     await addColumnIfNotExists(pool, 'clientes', 'data_abertura', 'VARCHAR(20)');
     await addColumnIfNotExists(pool, 'clientes', 'natureza_juridica', 'VARCHAR(255)');

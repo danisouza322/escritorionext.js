@@ -22,7 +22,7 @@ const tarefaUpdateSchema = z.object({
 // GET para obter uma tarefa específica
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -30,7 +30,7 @@ export async function GET(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(params.id);
+    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
 
     const [tarefa] = await db.query.tarefas.findMany({
@@ -58,7 +58,7 @@ export async function GET(
 // PATCH para atualizar apenas o status da tarefa
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -66,7 +66,7 @@ export async function PATCH(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(params.id);
+    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
 
     // Verificar se a tarefa existe e pertence à contabilidade do usuário
@@ -131,7 +131,7 @@ export async function PATCH(
 // PUT para atualizar outros campos da tarefa
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -139,7 +139,7 @@ export async function PUT(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(params.id);
+    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
 
     // Verificar se a tarefa existe e pertence à contabilidade do usuário

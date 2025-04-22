@@ -12,7 +12,7 @@ const observacaoSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export async function GET(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(params.id);
+    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
 
     // Verificar se a tarefa pertence à contabilidade do usuário
@@ -56,7 +56,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -64,7 +64,7 @@ export async function POST(
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(params.id);
+    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
     const usuarioId = Number(session.user.id);
 

@@ -52,9 +52,9 @@ export default async function TarefasPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Tarefas</h1>
-          <p className="text-muted-foreground">
+          <span className="text-muted-foreground block">
             Gerencie as tarefas e obrigações do escritório
-          </p>
+          </span>
         </div>
         <TarefaForm 
           clientes={clientesList} 
@@ -69,24 +69,24 @@ export default async function TarefasPage() {
       
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">Total</p>
-          <p className="text-3xl font-bold">{tarefasList.length}</p>
+          <span className="text-muted-foreground text-sm block">Total</span>
+          <span className="text-3xl font-bold block">{tarefasList.length}</span>
         </div>
         <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">Pendentes</p>
-          <p className="text-3xl font-bold">{statusTarefas.pendente || 0}</p>
+          <span className="text-muted-foreground text-sm block">Pendentes</span>
+          <span className="text-3xl font-bold block">{statusTarefas.pendente || 0}</span>
         </div>
         <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">Em Andamento</p>
-          <p className="text-3xl font-bold">{statusTarefas.em_andamento || 0}</p>
+          <span className="text-muted-foreground text-sm block">Em Andamento</span>
+          <span className="text-3xl font-bold block">{statusTarefas.em_andamento || 0}</span>
         </div>
         <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">Concluídas</p>
-          <p className="text-3xl font-bold">{statusTarefas.concluida || 0}</p>
+          <span className="text-muted-foreground text-sm block">Concluídas</span>
+          <span className="text-3xl font-bold block">{statusTarefas.concluida || 0}</span>
         </div>
         <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">Atrasadas</p>
-          <p className="text-3xl font-bold text-destructive">{statusTarefas.atrasada || 0}</p>
+          <span className="text-muted-foreground text-sm block">Atrasadas</span>
+          <span className="text-3xl font-bold text-destructive block">{statusTarefas.atrasada || 0}</span>
         </div>
       </div>
       

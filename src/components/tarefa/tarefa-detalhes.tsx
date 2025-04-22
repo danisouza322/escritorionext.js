@@ -413,7 +413,7 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
             {tarefa.descricao && (
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Descrição</h3>
-                <p className="text-sm whitespace-pre-wrap">{tarefa.descricao}</p>
+                <span className="text-sm whitespace-pre-wrap block">{tarefa.descricao}</span>
               </div>
             )}
           </CardContent>
@@ -447,12 +447,12 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
             
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-1">Data de Criação</h3>
-              <p className="text-sm">{formataData(tarefa.dataCriacao)}</p>
+              <span className="text-sm block">{formataData(tarefa.dataCriacao)}</span>
             </div>
             
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-1">Última Atualização</h3>
-              <p className="text-sm">{formataData(tarefa.dataAtualizacao)}</p>
+              <span className="text-sm block">{formataData(tarefa.dataAtualizacao)}</span>
             </div>
           </CardContent>
         </Card>
@@ -516,10 +516,10 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
                               <AvatarFallback>{observacao.usuario?.nome?.charAt(0) || "U"}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="text-sm font-medium">{observacao.usuario?.nome || "Usuário"}</p>
-                              <p className="text-xs text-muted-foreground">
+                              <span className="block text-sm font-medium">{observacao.usuario?.nome || "Usuário"}</span>
+                              <span className="block text-xs text-muted-foreground">
                                 {formataData(observacao.dataCriacao)}
-                              </p>
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -590,7 +590,7 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
                             <FileIcon className="h-5 w-5 text-muted-foreground" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium">{arquivo.nome}</p>
+                            <span className="block text-sm font-medium">{arquivo.nome}</span>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span>{arquivo.usuario?.nome || "Usuário"}</span>
                               <span>•</span>
