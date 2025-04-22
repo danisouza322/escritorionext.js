@@ -2,8 +2,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { tarefas, usuarios, clientes } from "@/db/schema";
-import { eq, desc, and, or } from "drizzle-orm";
+import { tarefas, usuarios, clientes, tarefasResponsaveis } from "@/db/schema";
+import { eq, desc, and, or, exists } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
 import TarefaList from "@/components/tarefa/tarefa-list";
 import TarefaForm from "@/components/tarefa/tarefa-form";
@@ -19,13 +19,24 @@ export default async function TarefasPage() {
   const contabilidadeId = Number(session.user.contabilidadeId);
   const usuarioId = Number(session.user.id);
   
-  // Buscar tarefas onde o usuário é responsável OU é o criador
+  // Buscar tarefas onde o usuário é responsável principal OU está na lista de responsáveis adicionais OU é o criador
   const tarefasList = await db.query.tarefas.findMany({
     where: and(
       eq(tarefas.contabilidadeId, contabilidadeId),
       or(
         eq(tarefas.responsavelId, usuarioId),
-        eq(tarefas.criadorId, usuarioId)
+        eq(tarefas.criadorId, usuarioId),
+        // Adiciona verificação na tabela de responsáveis
+        exists(
+          db.select()
+            .from(tarefasResponsaveis)
+            .where(
+              and(
+                eq(tarefasResponsaveis.tarefaId, tarefas.id),
+                eq(tarefasResponsaveis.usuarioId, usuarioId)
+              )
+            )
+        )
       )
     ),
     orderBy: [desc(tarefas.dataCriacao)],
@@ -33,6 +44,11 @@ export default async function TarefasPage() {
       cliente: true,
       responsavel: true,
       criador: true,
+      responsaveis: {
+        with: {
+          usuario: true,
+        }
+      },
     },
   });
   

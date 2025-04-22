@@ -287,7 +287,24 @@ export default function TarefaList({ tarefas }: TarefaListProps) {
                     )}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {tarefa.responsavel?.nome || "--"}
+                    {tarefa.responsaveis && tarefa.responsaveis.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {tarefa.responsaveis.slice(0, 3).map((resp) => (
+                          <div key={resp.id} className="flex items-center">
+                            <span className="truncate max-w-[100px]" title={resp.usuario?.nome}>
+                              {resp.usuario?.nome?.split(" ")[0]}
+                            </span>
+                            {tarefa.responsaveis && tarefa.responsaveis.length > 3 && 
+                             resp === tarefa.responsaveis[2] && 
+                             <span title={`+${tarefa.responsaveis.length - 3} responsáveis`}>...</span>}
+                          </div>
+                        ))}
+                      </div>
+                    ) : tarefa.responsavel?.nome ? (
+                      tarefa.responsavel.nome
+                    ) : (
+                      "--"
+                    )}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     {tarefa.dataVencimento ? (
