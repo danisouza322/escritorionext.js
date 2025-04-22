@@ -154,10 +154,10 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
       <DialogTrigger asChild>
         {children || <Button>Novo Cliente</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" aria-describedby="cliente-form-description">
         <DialogHeader>
           <DialogTitle>{cliente ? "Editar" : "Novo"} Cliente</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="cliente-form-description">
             Preencha os dados do cliente abaixo.
           </DialogDescription>
         </DialogHeader>

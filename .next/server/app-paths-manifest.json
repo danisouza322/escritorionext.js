@@ -1,5 +1,7 @@
 {
+  "/api/clientes/route": "app/api/clientes/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/page": "app/page.js",
-  "/dashboard/documentos/page": "app/dashboard/documentos/page.js"
+  "/dashboard/clientes/cadastrar/page": "app/dashboard/clientes/cadastrar/page.js",
+  "/dashboard/clientes/page": "app/dashboard/clientes/page.js"
 }

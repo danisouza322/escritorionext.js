@@ -161,10 +161,10 @@ export default function TarefaForm({
           <Button>Nova Tarefa</Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" aria-describedby="tarefa-form-description">
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="tarefa-form-description">
             Preencha os detalhes da tarefa abaixo.
           </DialogDescription>
         </DialogHeader>

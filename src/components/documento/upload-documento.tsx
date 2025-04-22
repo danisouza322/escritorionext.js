@@ -159,10 +159,10 @@ export default function UploadDocumento({ children, clienteId }: UploadDocumento
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" aria-describedby="documento-upload-description">
         <DialogHeader>
           <DialogTitle>Upload de Documento</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="documento-upload-description">
             Selecione um arquivo e preencha as informações do documento.
           </DialogDescription>
         </DialogHeader>
