@@ -66,6 +66,9 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
   const { toast } = useToast();
   const { data: session } = useSession();
   
+  // Debug - imprimir dados da tarefa no console
+  console.log('Dados da tarefa:', tarefa);
+  
   const [observacao, setObservacao] = useState("");
   const [enviandoObservacao, setEnviandoObservacao] = useState(false);
   const [arquivoSelecionado, setArquivoSelecionado] = useState<File | null>(null);
