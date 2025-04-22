@@ -113,9 +113,12 @@ export async function GET(
       return new NextResponse("Tarefa não encontrada", { status: 404 });
     }
 
-    // Buscar os arquivos
+    // Buscar os arquivos (apenas ativos)
     const arquivos = await db.query.arquivosTarefas.findMany({
-      where: eq(arquivosTarefas.tarefaId, tarefaId),
+      where: and(
+        eq(arquivosTarefas.tarefaId, tarefaId),
+        eq(arquivosTarefas.ativo, true)
+      ),
       with: {
         usuario: true,
       },

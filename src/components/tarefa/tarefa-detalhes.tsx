@@ -305,6 +305,8 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
   const excluirObservacao = async (observacaoId: number) => {
     try {
       setExcluindoObservacao(true);
+      console.log("Excluindo observação:", observacaoId);
+      
       const response = await fetch(`/api/tarefas/${tarefa.id}/observacoes?observacaoId=${observacaoId}`, {
         method: "DELETE",
       });
@@ -313,8 +315,17 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
         throw new Error("Erro ao excluir observação");
       }
       
+      console.log("Observação excluída com sucesso");
+      
       // Atualizar a lista de observações, removendo a observação excluída
-      setObservacoes(observacoes.filter(obs => obs.id !== observacaoId));
+      setObservacoes(prevObservacoes => 
+        prevObservacoes.filter(obs => obs.id !== observacaoId)
+      );
+      
+      // Recarregar observações após exclusão
+      setTimeout(() => {
+        buscarObservacoes();
+      }, 500);
       
       toast({
         title: "Observação excluída",
@@ -336,6 +347,8 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
   const excluirArquivo = async (arquivoId: number) => {
     try {
       setExcluindoArquivo(true);
+      console.log("Excluindo arquivo:", arquivoId);
+      
       const response = await fetch(`/api/tarefas/${tarefa.id}/arquivos?arquivoId=${arquivoId}`, {
         method: "DELETE",
       });
@@ -344,8 +357,17 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
         throw new Error("Erro ao excluir arquivo");
       }
       
+      console.log("Arquivo excluído com sucesso");
+      
       // Atualizar a lista de arquivos, removendo o arquivo excluído
-      setArquivos(arquivos.filter(arq => arq.id !== arquivoId));
+      setArquivos(prevArquivos => 
+        prevArquivos.filter(arq => arq.id !== arquivoId)
+      );
+      
+      // Recarregar arquivos após exclusão
+      setTimeout(() => {
+        buscarArquivos();
+      }, 500);
       
       toast({
         title: "Arquivo excluído",
@@ -383,8 +405,8 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-2xl">{tarefa.titulo}</CardTitle>
-                <CardDescription>
-                  <div className="mt-2 flex items-center gap-2">
+                <div className="mt-2">
+                  <div className="flex items-center gap-2">
                     <Badge>
                       {getTipoTarefaLabel(tarefa.tipo)}
                     </Badge>
@@ -400,7 +422,7 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
                       {getStatusTarefaLabel(tarefa.status)}
                     </Badge>
                   </div>
-                </CardDescription>
+                </div>
               </div>
               
               <div className="flex gap-2">
@@ -623,7 +645,9 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                   <AlertDialogAction 
-                                    onClick={() => excluirObservacao(observacao.id)}
+                                    onClick={() => {
+                                      excluirObservacao(observacao.id);
+                                    }}
                                     disabled={excluindoObservacao}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >
@@ -745,7 +769,9 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                   <AlertDialogAction 
-                                    onClick={() => excluirArquivo(arquivo.id)}
+                                    onClick={() => {
+                                      excluirArquivo(arquivo.id);
+                                    }}
                                     disabled={excluindoArquivo}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >

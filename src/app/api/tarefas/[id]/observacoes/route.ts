@@ -112,9 +112,12 @@ export async function GET(
       return new NextResponse("Tarefa não encontrada", { status: 404 });
     }
 
-    // Buscar as observações
+    // Buscar as observações (apenas ativas)
     const observacoes = await db.query.observacoesTarefas.findMany({
-      where: eq(observacoesTarefas.tarefaId, tarefaId),
+      where: and(
+        eq(observacoesTarefas.tarefaId, tarefaId),
+        eq(observacoesTarefas.ativo, true)
+      ),
       with: {
         usuario: true,
       },
