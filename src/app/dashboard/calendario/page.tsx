@@ -98,7 +98,7 @@ export default function CalendarioPage() {
             <CardDescription>Selecione uma data para ver as tarefas</CardDescription>
           </CardHeader>
           <CardContent>
-            <Calendar
+            <CalendarSimple
               mode="single"
               selected={data}
               onSelect={(date) => {

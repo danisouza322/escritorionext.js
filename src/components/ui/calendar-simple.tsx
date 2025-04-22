@@ -6,16 +6,19 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+// Este é um componente simplificado do calendário que funciona com react-day-picker
+export function CalendarSimple(props: any) {
+  const {
+    className,
+    classNames,
+    showOutsideDays = true,
+    mode = "single",
+    ...otherProps
+  } = props;
 
-export function CalendarSimple({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
-}: CalendarProps) {
   return (
     <DayPicker
+      mode={mode}
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
       locale={ptBR}
@@ -50,7 +53,11 @@ export function CalendarSimple({
         day_hidden: "invisible",
         ...classNames,
       }}
-      {...props}
+      components={{
+        IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+        IconRight: () => <ChevronRight className="h-4 w-4" />,
+      }}
+      {...otherProps}
     />
   )
 }
