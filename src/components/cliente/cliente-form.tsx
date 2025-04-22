@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Cliente } from "@/types";
 import {
   Form,
   FormControl,
@@ -57,11 +58,13 @@ type ClienteFormValues = z.infer<typeof clienteSchema>;
 
 interface ClienteFormProps {
   children?: React.ReactNode;
-  cliente?: any; // Cliente para edição
+  cliente?: Cliente; // Cliente para edição
+  onClose?: () => void; // Callback quando o modal é fechado
+  onSuccess?: (cliente: Cliente) => void; // Callback após o sucesso
 }
 
-export default function ClienteForm({ children, cliente }: ClienteFormProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function ClienteForm({ children, cliente, onClose, onSuccess }: ClienteFormProps) {
+  const [isOpen, setIsOpen] = useState(cliente ? true : false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsultandoCNPJ, setIsConsultandoCNPJ] = useState(false);
   const router = useRouter();
@@ -200,9 +203,29 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
         });
       }
 
-      // Fechar modal e atualizar dados
+      // Fechar modal e chamar callbacks
       setIsOpen(false);
-      router.refresh();
+      
+      // Se for edição e temos uma função de sucesso, chamá-la
+      if (cliente && onSuccess) {
+        // Buscar cliente atualizado
+        const fetchResponse = await fetch(`/api/clientes/${cliente.id}`);
+        if (fetchResponse.ok) {
+          const clienteAtualizado = await fetchResponse.json();
+          onSuccess(clienteAtualizado);
+        } else {
+          // Falha ao obter dados atualizados, apenas atualizar página
+          router.refresh();
+        }
+      } else {
+        // Atualizar a página nos outros casos
+        router.refresh();
+      }
+      
+      // Chamar callback de fechamento se existir
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
       console.error("Erro:", error);
       toast({
@@ -215,8 +238,17 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
     }
   }
 
+  // Função para lidar com a alteração do estado do modal
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    // Se o modal estiver sendo fechado e temos um callback de fechamento
+    if (!open && onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children || <Button>Novo Cliente</Button>}
       </DialogTrigger>
@@ -473,7 +505,7 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
             />
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSubmitting}>
