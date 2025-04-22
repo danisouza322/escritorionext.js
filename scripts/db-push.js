@@ -10,8 +10,8 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-// Comando para executar o drizzle-kit push
-const command = 'npx drizzle-kit push:pg';
+// Comando para executar o drizzle-kit push (versão atualizada)
+const command = 'npx drizzle-kit push';
 
 console.log('Executando migração do banco de dados...');
 
