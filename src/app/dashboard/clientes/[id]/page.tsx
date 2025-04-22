@@ -29,12 +29,11 @@ export default async function ClienteDetalhesPage({
   const contabilidadeId = Number(session.user.contabilidadeId);
   
   // Verificar se o id é um número válido
-  const { id } = params;
-  if (isNaN(Number(id)) || id === 'cadastrar') {
+  const clienteId = Number(params.id);
+  
+  if (isNaN(clienteId) || params.id === 'cadastrar') {
     redirect("/dashboard/clientes");
   }
-  
-  const clienteId = Number(id);
   
   // Buscar cliente
   const cliente = await db.query.clientes.findFirst({

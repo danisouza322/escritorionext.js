@@ -11,17 +11,21 @@ const clienteSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   tipo: z.enum(["pessoa_fisica", "pessoa_juridica"]),
   documento: z.string().min(1, "Documento é obrigatório"),
-  email: z.string().email("Email inválido").optional().nullable(),
-  telefone: z.string().optional().nullable(),
-  endereco: z.string().optional().nullable(),
-  cidade: z.string().optional().nullable(),
-  estado: z.string().optional().nullable(),
-  cep: z.string().optional().nullable(),
-  data_abertura: z.string().optional().nullable(),
-  natureza_juridica: z.string().optional().nullable(),
-  atividade_principal: z.string().optional().nullable(),
+  email: z.union([
+    z.string().email("Email inválido"),
+    z.string().length(0),
+    z.null()
+  ]).optional(),
+  telefone: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  endereco: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  cidade: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  estado: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  cep: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  data_abertura: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  natureza_juridica: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
+  atividade_principal: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
   simples_nacional: z.enum(["sim", "nao"]).optional().nullable(),
-  observacoes: z.string().optional().nullable(),
+  observacoes: z.union([z.string().min(1), z.string().length(0), z.null()]).optional(),
 });
 
 export async function GET(

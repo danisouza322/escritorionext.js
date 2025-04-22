@@ -29,9 +29,10 @@ interface ClienteListProps {
   clientes: Cliente[];
 }
 
-export default function ClienteList({ clientes }: ClienteListProps) {
+export default function ClienteList({ clientes: clientesIniciais }: ClienteListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
+  const [clientes, setClientes] = useState<Cliente[]>(clientesIniciais);
   
   // Buscar detalhes do cliente para edição
   const buscarDetalhesCliente = async (clienteId: number) => {
@@ -65,9 +66,15 @@ export default function ClienteList({ clientes }: ClienteListProps) {
 
   // Função para atualizar a lista local após edição bem-sucedida
   const atualizarListaClientes = (clienteAtualizado: Cliente) => {
-    // Atualização local para evitar ter que recarregar a página
-    // Isso é opcional, mas melhora a experiência do usuário
-    window.location.reload();
+    // Atualizamos o cliente na lista local sem recarregar a página
+    setClientes(clientesAtuais => 
+      clientesAtuais.map(c => 
+        c.id === clienteAtualizado.id ? clienteAtualizado : c
+      )
+    );
+    
+    // Fechamos o modal após a edição
+    limparClienteSelecionado();
   };
 
   return (
