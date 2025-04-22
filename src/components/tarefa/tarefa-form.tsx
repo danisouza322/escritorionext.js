@@ -217,7 +217,7 @@ export default function TarefaForm({
           <Button>Nova Tarefa</Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[750px] lg:max-w-[900px]" aria-describedby="tarefa-form-description">
+      <DialogContent className="sm:max-w-[600px] lg:max-w-[700px] max-h-[90vh] overflow-y-auto" aria-describedby="tarefa-form-description">
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
           <DialogDescription id="tarefa-form-description">
