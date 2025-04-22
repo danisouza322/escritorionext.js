@@ -37,16 +37,18 @@ async function getData(clienteIdParam: string) {
   
   const contabilidadeId = Number(session.user.contabilidadeId);
   
-  // Buscar cliente
+  // Buscar cliente (somente ativos)
   const cliente = await db.query.clientes.findFirst({
     where: and(
       eq(clientes.contabilidadeId, contabilidadeId),
-      eq(clientes.id, clienteId)
+      eq(clientes.id, clienteId),
+      eq(clientes.ativo, true)
     ),
   });
   
   if (!cliente) {
-    return { notFound: true };
+    // Cliente não encontrado ou não está ativo
+    return { redirect: "/dashboard/clientes" };
   }
   
   // Buscar documentos do cliente
@@ -124,7 +126,11 @@ export default async function ClienteDetalhesPage({ params }: { params: { id: st
           </div>
         </div>
         <div className="flex gap-2">
-          <RemoveClienteButton id={clienteId} />
+          <RemoveClienteButton 
+            id={clienteId} 
+            nome={cliente.nome}
+            redirectTo="/dashboard/clientes"
+          />
         </div>
       </div>
       

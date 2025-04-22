@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,12 +21,14 @@ interface RemoveClienteButtonProps {
   id: number;
   nome: string;
   onSuccess?: () => void;
+  redirectTo?: string; // Caminho para redirecionamento após remover
 }
 
-export default function RemoveClienteButton({ id, nome, onSuccess }: RemoveClienteButtonProps) {
+export default function RemoveClienteButton({ id, nome, onSuccess, redirectTo }: RemoveClienteButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   async function removerCliente() {
     setIsLoading(true);
@@ -48,6 +51,11 @@ export default function RemoveClienteButton({ id, nome, onSuccess }: RemoveClien
       // Chamar callback se existir
       if (onSuccess) {
         onSuccess();
+      }
+      
+      // Redirecionar se solicitado
+      if (redirectTo) {
+        router.push(redirectTo);
       }
     } catch (error) {
       console.error("Erro ao remover cliente:", error);
