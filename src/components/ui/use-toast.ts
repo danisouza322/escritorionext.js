@@ -1,5 +1,4 @@
-"use client"
-
+// Inspired by react-hot-toast library
 import * as React from "react"
 
 import type {
@@ -128,7 +127,7 @@ export const reducer = (state: State, action: Action): State => {
   }
 }
 
-const listeners: Array<(state: State) => void> = []
+const listeners: ((state: State) => void)[] = []
 
 let memoryState: State = { toasts: [] }
 
@@ -139,7 +138,7 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
+interface Toast extends Omit<ToasterToast, "id"> {}
 
 function toast({ ...props }: Toast) {
   const id = genId()

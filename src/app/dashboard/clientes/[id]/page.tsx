@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { clientes, documentos, tarefas } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, FolderKanban, Pencil } from "lucide-react";
+import { ArrowLeft, FileText, FolderKanban, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,26 +14,28 @@ import UploadDocumento from "@/components/documento/upload-documento";
 import DocumentoList from "@/components/documento/documento-list";
 import TarefaList from "@/components/tarefa/tarefa-list";
 import TarefaForm from "@/components/tarefa/tarefa-form";
+import RemoveClienteButton from "@/components/cliente/remove-cliente-button";
 
-export default async function ClienteDetalhesPage({
-  params
-}: {
-  params: { id: string }
-}) {
+// Solução alternativa para o problema do params.id
+interface PageProps {
+  params: { id: string };
+}
+
+// Função para buscar as informações do cliente
+async function getData(clienteIdParam: string) {
   const session = await getServerSession(authOptions);
-
+  
   if (!session) {
-    redirect("/auth");
+    return { redirect: "/auth" };
   }
-
+  
+  const clienteId = Number(clienteIdParam);
+  
+  if (isNaN(clienteId) || clienteIdParam === 'cadastrar') {
+    return { redirect: "/dashboard/clientes" };
+  }
+  
   const contabilidadeId = Number(session.user.contabilidadeId);
-  
-  // Verificar se o id é um número válido
-  const clienteId = Number(params.id);
-  
-  if (isNaN(clienteId) || params.id === 'cadastrar') {
-    redirect("/dashboard/clientes");
-  }
   
   // Buscar cliente
   const cliente = await db.query.clientes.findFirst({
@@ -44,7 +46,7 @@ export default async function ClienteDetalhesPage({
   });
   
   if (!cliente) {
-    notFound();
+    return { notFound: true };
   }
   
   // Buscar documentos do cliente
@@ -75,6 +77,34 @@ export default async function ClienteDetalhesPage({
   const colaboradores = await db.query.usuarios.findMany({
     where: eq(tarefas.contabilidadeId, contabilidadeId),
   });
+  
+  return {
+    cliente,
+    documentosCliente,
+    tarefasCliente,
+    colaboradores,
+    clienteId,
+    contabilidadeId
+  };
+}
+
+export default async function ClienteDetalhesPage(props: PageProps) {
+  // Extraímos o ID do cliente de forma segura, criando uma variável com o valor em string
+  const clienteIdStr = String(props.params.id);
+  
+  // Buscamos os dados usando a função auxiliar
+  const data = await getData(clienteIdStr);
+  
+  if ('redirect' in data) {
+    redirect(data.redirect);
+  }
+  
+  if ('notFound' in data) {
+    notFound();
+  }
+  
+  // Extraímos todos os dados necessários retornados pela função
+  const { cliente, documentosCliente, tarefasCliente, colaboradores, clienteId } = data;
 
   return (
     <div className="space-y-6">
@@ -91,6 +121,9 @@ export default async function ClienteDetalhesPage({
               {cliente.tipo === "pessoa_fisica" ? "Pessoa Física" : "Pessoa Jurídica"}
             </p>
           </div>
+        </div>
+        <div className="flex gap-2">
+          <RemoveClienteButton id={clienteId} />
         </div>
       </div>
       
