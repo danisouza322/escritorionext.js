@@ -2,8 +2,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { tarefas, usuarios } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { tarefas, usuarios, clientes } from "@/db/schema";
+import { eq, desc, and } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
 import TarefaList from "@/components/tarefa/tarefa-list";
 import TarefaForm from "@/components/tarefa/tarefa-form";
@@ -28,9 +28,13 @@ export default async function TarefasPage() {
     },
   });
   
-  // Buscar clientes e colaboradores para o form
-  const clientes = await db.query.clientes.findMany({
-    where: eq(tarefas.contabilidadeId, contabilidadeId),
+  // Buscar clientes ativos e colaboradores para o form
+  const clientesList = await db.query.clientes.findMany({
+    where: (fields, { eq, and }) => 
+      and(
+        eq(fields.contabilidadeId, contabilidadeId),
+        eq(fields.ativo, true)
+      ),
   });
   
   const colaboradores = await db.query.usuarios.findMany({
@@ -53,7 +57,7 @@ export default async function TarefasPage() {
           </p>
         </div>
         <TarefaForm 
-          clientes={clientes} 
+          clientes={clientesList} 
           colaboradores={colaboradores}
         >
           <Button className="gap-2">
