@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/api/auth/[...nextauth]/route": [
+    "/api/tarefas/[id]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/[...nextauth]/route.js"
+      "static/chunks/app/api/tarefas/[id]/route.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -21,25 +21,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/tarefas/page.js"
     ],
-    "/dashboard/tarefas/[id]/page": [
+    "/api/auth/[...nextauth]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/tarefas/[id]/page.js"
-    ],
-    "/api/tarefas/[id]/arquivos/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/tarefas/[id]/arquivos/route.js"
-    ],
-    "/api/tarefas/[id]/observacoes/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/tarefas/[id]/observacoes/route.js"
-    ],
-    "/api/tarefas/[id]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/tarefas/[id]/route.js"
+      "static/chunks/app/api/auth/[...nextauth]/route.js"
     ],
     "/page": [
       "static/chunks/webpack.js",

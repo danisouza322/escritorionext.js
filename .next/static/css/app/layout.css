@@ -754,6 +754,9 @@ video {
 .ml-auto {
   margin-left: auto;
 }
+.mr-1 {
+  margin-right: 0.25rem;
+}
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -777,6 +780,9 @@ video {
 }
 .block {
   display: block;
+}
+.inline-block {
+  display: inline-block;
 }
 .flex {
   display: flex;
@@ -1657,6 +1663,10 @@ video {
 
 .hover\:text-destructive:hover {
   color: hsl(var(--destructive));
+}
+
+.hover\:text-destructive\/90:hover {
+  color: hsl(var(--destructive) / 0.9);
 }
 
 .hover\:text-foreground:hover {

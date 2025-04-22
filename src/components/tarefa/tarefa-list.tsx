@@ -11,6 +11,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Tarefa } from "@/types";
 import { 
   formataData, 
@@ -24,7 +35,9 @@ import {
   Clock,
   AlertCircle,
   Users,
-  Calendar
+  Calendar,
+  Trash2,
+  Info
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
@@ -77,6 +90,40 @@ export default function TarefaList({ tarefas }: TarefaListProps) {
       });
     }
   };
+  
+  const handleDelete = async (tarefaId: number) => {
+    try {
+      const response = await fetch(`/api/tarefas/${tarefaId}`, {
+        method: "DELETE",
+      });
+
+      if (response.status === 403) {
+        toast({
+          title: "Acesso negado",
+          description: "Apenas o criador da tarefa pode excluí-la",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Erro ao excluir tarefa");
+      }
+
+      toast({
+        title: "Tarefa excluída",
+        description: "A tarefa foi excluída com sucesso",
+      });
+
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a tarefa",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Função para renderizar o ícone do status
   const getStatusIcon = (status: string) => {
@@ -123,6 +170,40 @@ export default function TarefaList({ tarefas }: TarefaListProps) {
             Concluir
           </Button>
         )}
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive/90"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir tarefa</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir esta tarefa?<br/>
+                <span className="font-medium">{tarefa.titulo}</span><br/>
+                <span className="text-xs text-muted-foreground mt-1">
+                  <Info className="h-3 w-3 inline-block mr-1" />
+                  Somente o criador da tarefa pode excluí-la.
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => handleDelete(tarefa.id)}
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   };
