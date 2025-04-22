@@ -11,6 +11,80 @@ import { writeFile, mkdir } from "fs/promises";
 // Diretório para salvar os arquivos
 const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "tarefas");
 
+// DELETE para remover um arquivo específico
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return new NextResponse("Não autorizado", { status: 401 });
+    }
+
+    // Obter o ID do arquivo da URL de consulta
+    const url = new URL(request.url);
+    const arquivoId = url.searchParams.get("arquivoId");
+    
+    if (!arquivoId) {
+      return new NextResponse("ID do arquivo não fornecido", { status: 400 });
+    }
+
+    const tarefaId = parseInt(context.params.id as string, 10);
+    const contabilidadeId = Number(session.user.contabilidadeId);
+    const usuarioId = Number(session.user.id);
+
+    // Verificar se a tarefa pertence à contabilidade do usuário
+    const [tarefa] = await db
+      .select()
+      .from(tarefas)
+      .where(
+        and(
+          eq(tarefas.id, tarefaId),
+          eq(tarefas.contabilidadeId, contabilidadeId)
+        )
+      );
+
+    if (!tarefa) {
+      return new NextResponse("Tarefa não encontrada", { status: 404 });
+    }
+
+    // Buscar o arquivo para verificar se o usuário atual é o autor
+    const [arquivo] = await db
+      .select()
+      .from(arquivosTarefas)
+      .where(
+        and(
+          eq(arquivosTarefas.id, parseInt(arquivoId, 10)),
+          eq(arquivosTarefas.tarefaId, tarefaId)
+        )
+      );
+
+    if (!arquivo) {
+      return new NextResponse("Arquivo não encontrado", { status: 404 });
+    }
+
+    // Verificar se o usuário atual é o autor do arquivo
+    if (arquivo.usuarioId !== usuarioId) {
+      return new NextResponse("Você não tem permissão para excluir este arquivo", { status: 403 });
+    }
+
+    // Excluir o arquivo (usando exclusão lógica, apenas marcando como inativo)
+    await db
+      .update(arquivosTarefas)
+      .set({ 
+        ativo: false,
+        dataAtualizacao: new Date() 
+      })
+      .where(eq(arquivosTarefas.id, parseInt(arquivoId, 10)));
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("Erro ao excluir arquivo:", error);
+    return new NextResponse("Erro interno do servidor", { status: 500 });
+  }
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: { id: string } }

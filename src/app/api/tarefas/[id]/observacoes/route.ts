@@ -10,6 +10,80 @@ const observacaoSchema = z.object({
   texto: z.string().min(1, "O texto da observação é obrigatório"),
 });
 
+// DELETE para remover uma observação específica
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return new NextResponse("Não autorizado", { status: 401 });
+    }
+
+    // Obter o ID da observação da URL de consulta
+    const url = new URL(request.url);
+    const observacaoId = url.searchParams.get("observacaoId");
+    
+    if (!observacaoId) {
+      return new NextResponse("ID da observação não fornecido", { status: 400 });
+    }
+
+    const tarefaId = parseInt(context.params.id as string, 10);
+    const contabilidadeId = Number(session.user.contabilidadeId);
+    const usuarioId = Number(session.user.id);
+
+    // Verificar se a tarefa pertence à contabilidade do usuário
+    const [tarefa] = await db
+      .select()
+      .from(tarefas)
+      .where(
+        and(
+          eq(tarefas.id, tarefaId),
+          eq(tarefas.contabilidadeId, contabilidadeId)
+        )
+      );
+
+    if (!tarefa) {
+      return new NextResponse("Tarefa não encontrada", { status: 404 });
+    }
+
+    // Buscar a observação para verificar se o usuário atual é o autor
+    const [observacao] = await db
+      .select()
+      .from(observacoesTarefas)
+      .where(
+        and(
+          eq(observacoesTarefas.id, parseInt(observacaoId, 10)),
+          eq(observacoesTarefas.tarefaId, tarefaId)
+        )
+      );
+
+    if (!observacao) {
+      return new NextResponse("Observação não encontrada", { status: 404 });
+    }
+
+    // Verificar se o usuário atual é o autor da observação
+    if (observacao.usuarioId !== usuarioId) {
+      return new NextResponse("Você não tem permissão para excluir esta observação", { status: 403 });
+    }
+
+    // Excluir a observação (usando exclusão lógica, apenas marcando como inativo)
+    await db
+      .update(observacoesTarefas)
+      .set({ 
+        ativo: false,
+        dataAtualizacao: new Date() 
+      })
+      .where(eq(observacoesTarefas.id, parseInt(observacaoId, 10)));
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("Erro ao excluir observação:", error);
+    return new NextResponse("Erro interno do servidor", { status: 500 });
+  }
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: { id: string } }

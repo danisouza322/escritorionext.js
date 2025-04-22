@@ -29,7 +29,10 @@ import {
   XCircle,
   Send,
   File as FileIcon,
-  Download
+  Download,
+  Trash2,
+  AlertTriangle,
+  Loader2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +43,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSession } from "next-auth/react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TarefaDetalhesProps {
   tarefa: Tarefa;
@@ -49,6 +64,7 @@ interface TarefaDetalhesProps {
 export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhesProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { data: session } = useSession();
   
   const [observacao, setObservacao] = useState("");
   const [enviandoObservacao, setEnviandoObservacao] = useState(false);
@@ -61,6 +77,10 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
   const [arquivos, setArquivos] = useState<ArquivoTarefa[]>([]);
   const [carregandoObservacoes, setCarregandoObservacoes] = useState(false);
   const [carregandoArquivos, setCarregandoArquivos] = useState(false);
+  const [excluindoObservacao, setExcluindoObservacao] = useState(false);
+  const [excluindoArquivo, setExcluindoArquivo] = useState(false);
+  
+  const usuarioId = Number(session?.user.id);
 
   // Buscar observações e arquivos ao carregar o componente
   useEffect(() => {
@@ -278,6 +298,68 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
       });
     } finally {
       setEnviandoArquivo(false);
+    }
+  };
+  
+  // Função para excluir uma observação
+  const excluirObservacao = async (observacaoId: number) => {
+    try {
+      setExcluindoObservacao(true);
+      const response = await fetch(`/api/tarefas/${tarefa.id}/observacoes?observacaoId=${observacaoId}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Erro ao excluir observação");
+      }
+      
+      // Atualizar a lista de observações, removendo a observação excluída
+      setObservacoes(observacoes.filter(obs => obs.id !== observacaoId));
+      
+      toast({
+        title: "Observação excluída",
+        description: "A observação foi removida com sucesso",
+      });
+    } catch (error) {
+      console.error("Erro ao excluir observação:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a observação",
+        variant: "destructive",
+      });
+    } finally {
+      setExcluindoObservacao(false);
+    }
+  };
+  
+  // Função para excluir um arquivo
+  const excluirArquivo = async (arquivoId: number) => {
+    try {
+      setExcluindoArquivo(true);
+      const response = await fetch(`/api/tarefas/${tarefa.id}/arquivos?arquivoId=${arquivoId}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Erro ao excluir arquivo");
+      }
+      
+      // Atualizar a lista de arquivos, removendo o arquivo excluído
+      setArquivos(arquivos.filter(arq => arq.id !== arquivoId));
+      
+      toast({
+        title: "Arquivo excluído",
+        description: "O arquivo foi removido com sucesso",
+      });
+    } catch (error) {
+      console.error("Erro ao excluir arquivo:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o arquivo",
+        variant: "destructive",
+      });
+    } finally {
+      setExcluindoArquivo(false);
     }
   };
 
@@ -522,6 +604,36 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
                               </span>
                             </div>
                           </div>
+                          
+                          {/* Botão de excluir (apenas para o autor da observação) */}
+                          {observacao.usuarioId === usuarioId && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Excluir observação</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir esta observação? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => excluirObservacao(observacao.id)}
+                                    disabled={excluindoObservacao}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    {excluindoObservacao && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
                         </div>
                         <div className="text-sm whitespace-pre-wrap">{observacao.texto}</div>
                       </div>
@@ -604,15 +716,47 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
                             </div>
                           </div>
                         </div>
-                        <a 
-                          href={arquivo.caminho} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline text-sm flex items-center gap-1"
-                        >
-                          <Download className="h-4 w-4" />
-                          Baixar
-                        </a>
+                        <div className="flex items-center gap-2">
+                          <a 
+                            href={arquivo.caminho} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline text-sm flex items-center gap-1"
+                          >
+                            <Download className="h-4 w-4" />
+                            Baixar
+                          </a>
+                          
+                          {/* Botão de excluir (apenas para o autor do arquivo) */}
+                          {arquivo.usuarioId === usuarioId && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Excluir arquivo</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir este arquivo? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => excluirArquivo(arquivo.id)}
+                                    disabled={excluindoArquivo}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    {excluindoArquivo && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
                       </div>
                     ))
                   )}
