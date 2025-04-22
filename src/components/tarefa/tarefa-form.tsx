@@ -115,13 +115,21 @@ export default function TarefaForm({
     setIsSubmitting(true);
     
     try {
+      // Processar dados antes de enviar
+      const processedData = {
+        ...data,
+        // Converter "0" para null onde apropriado
+        clienteId: data.clienteId === "0" ? null : data.clienteId,
+        responsavelId: data.responsavelId === "0" ? null : data.responsavelId,
+      };
+      
       // Enviar para a API
       const response = await fetch("/api/tarefas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(processedData),
       });
 
       if (!response.ok) {
@@ -262,7 +270,7 @@ export default function TarefaForm({
                             <SelectItem value="" disabled>Carregando...</SelectItem>
                           ) : (
                             <>
-                              <SelectItem value="">Nenhum cliente</SelectItem>
+                              <SelectItem value="0">Nenhum cliente</SelectItem>
                               {clientesList.map((cliente) => (
                                 <SelectItem key={cliente.id} value={String(cliente.id)}>
                                   {cliente.nome}
@@ -294,7 +302,7 @@ export default function TarefaForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Sem responsável</SelectItem>
+                        <SelectItem value="0">Sem responsável</SelectItem>
                         {colaboradores.map((colaborador) => (
                           <SelectItem key={colaborador.id} value={String(colaborador.id)}>
                             {colaborador.nome}
