@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { clientes } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { z } from "zod";
 
 // Validação dos dados de cliente
@@ -39,9 +39,12 @@ export async function GET() {
 
     const contabilidadeId = Number(session.user.contabilidadeId);
     
-    // Busca clientes da contabilidade do usuário logado
+    // Busca clientes ativos da contabilidade do usuário logado
     const clientesList = await db.query.clientes.findMany({
-      where: eq(clientes.contabilidadeId, contabilidadeId),
+      where: and(
+        eq(clientes.contabilidadeId, contabilidadeId),
+        eq(clientes.ativo, true)
+      ),
       orderBy: [desc(clientes.dataCriacao)],
     });
 

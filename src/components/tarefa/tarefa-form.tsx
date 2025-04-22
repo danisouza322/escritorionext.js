@@ -118,9 +118,9 @@ export default function TarefaForm({
       // Processar dados antes de enviar
       const processedData = {
         ...data,
-        // Converter "0" para null onde apropriado
-        clienteId: data.clienteId === "0" ? null : data.clienteId,
-        responsavelId: data.responsavelId === "0" ? null : data.responsavelId,
+        // Converter "0" para null onde apropriado e string para number onde necessário
+        clienteId: data.clienteId === "0" ? null : data.clienteId ? Number(data.clienteId) : null,
+        responsavelId: data.responsavelId === "0" ? null : data.responsavelId ? Number(data.responsavelId) : null,
       };
       
       // Enviar para a API
