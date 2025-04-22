@@ -161,7 +161,22 @@ export default function TarefaForm({
       open={isOpen} 
       onOpenChange={(open) => {
         setIsOpen(open);
-        if (open) fetchClientes();
+        if (open) {
+          // Buscar clientes
+          fetchClientes();
+          // Resetar o formulário para os valores padrão
+          form.reset({
+            titulo: "",
+            tipo: "fiscal",
+            status: "pendente",
+            clienteId: clienteId ? String(clienteId) : undefined,
+            responsavelId: undefined,
+            descricao: "",
+            dataVencimento: "",
+            prioridade: 0,
+            recorrente: false,
+          });
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -271,11 +286,13 @@ export default function TarefaForm({
                           ) : (
                             <>
                               <SelectItem value="0">Nenhum cliente</SelectItem>
-                              {clientesList.map((cliente) => (
-                                <SelectItem key={cliente.id} value={String(cliente.id)}>
-                                  {cliente.nome}
-                                </SelectItem>
-                              ))}
+                              {clientesList
+                                .filter(cliente => cliente.ativo) // Filtra apenas clientes ativos
+                                .map((cliente) => (
+                                  <SelectItem key={cliente.id} value={String(cliente.id)}>
+                                    {cliente.nome}
+                                  </SelectItem>
+                                ))}
                             </>
                           )}
                         </SelectContent>
