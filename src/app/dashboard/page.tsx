@@ -18,9 +18,12 @@ export default async function DashboardPage() {
 
   const contabilidadeId = Number(session.user.contabilidadeId);
   
-  // Buscar estatísticas
+  // Buscar estatísticas (apenas clientes ativos)
   const totalClientes = await db.query.clientes.findMany({
-    where: eq(clientes.contabilidadeId, contabilidadeId),
+    where: and(
+      eq(clientes.contabilidadeId, contabilidadeId),
+      eq(clientes.ativo, true)
+    ),
   }).then(res => res.length);
   
   const totalDocumentos = await db.query.documentos.findMany({
@@ -52,9 +55,12 @@ export default async function DashboardPage() {
     },
   });
   
-  // Clientes recentes
+  // Clientes recentes (apenas ativos)
   const clientesRecentes = await db.query.clientes.findMany({
-    where: eq(clientes.contabilidadeId, contabilidadeId),
+    where: and(
+      eq(clientes.contabilidadeId, contabilidadeId),
+      eq(clientes.ativo, true)
+    ),
     orderBy: [desc(clientes.dataCriacao)],
     limit: 5,
   });

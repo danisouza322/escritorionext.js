@@ -158,7 +158,7 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
                       <Link href={`/dashboard/clientes/${cliente.id}`}>
                         <Button variant="ghost" size="sm" className="gap-1">
                           <Eye className="h-4 w-4" />
-                          <span className="sr-only md:not-sr-only">Detalhes</span>
+                          <span className="sr-only">Detalhes</span>
                         </Button>
                       </Link>
                       <Button 
@@ -168,7 +168,7 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
                         onClick={() => buscarDetalhesCliente(cliente.id)}
                       >
                         <Pencil className="h-4 w-4" />
-                        <span className="sr-only md:not-sr-only">Editar</span>
+                        <span className="sr-only">Editar</span>
                       </Button>
                       <RemoveClienteButton 
                         id={cliente.id} 

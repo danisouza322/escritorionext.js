@@ -79,7 +79,7 @@ export default function RemoveClienteButton({ id, nome, onSuccess, redirectTo }:
           className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
         >
           <Trash className="h-4 w-4" />
-          <span className="sr-only md:not-sr-only">Remover</span>
+          <span className="sr-only">Remover</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
