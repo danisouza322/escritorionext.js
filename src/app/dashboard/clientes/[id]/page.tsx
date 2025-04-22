@@ -93,12 +93,6 @@ export default async function ClienteDetalhesPage({
             </p>
           </div>
         </div>
-        <Link href={`/dashboard/clientes/${clienteId}/editar`}>
-          <Button variant="outline" className="gap-2">
-            <Pencil className="h-4 w-4" />
-            Editar
-          </Button>
-        </Link>
       </div>
       
       <Card>

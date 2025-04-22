@@ -252,7 +252,7 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
       <DialogTrigger asChild>
         {children || <Button>Novo Cliente</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" aria-describedby="cliente-form-description">
+      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px] max-h-[90vh] overflow-y-auto" aria-describedby="cliente-form-description">
         <DialogHeader>
           <DialogTitle>{cliente ? "Editar" : "Novo"} Cliente</DialogTitle>
           <DialogDescription id="cliente-form-description">
@@ -261,7 +261,7 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="tipo"
