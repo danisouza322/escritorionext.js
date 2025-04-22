@@ -89,11 +89,12 @@ async function getData(clienteIdParam: string) {
 }
 
 export default async function ClienteDetalhesPage(props: PageProps) {
-  // Extraímos o ID do cliente de forma segura, criando uma variável com o valor em string
-  const clienteIdStr = String(props.params.id);
+  // Buscamos os dados usando a função auxiliar diretamente com o objeto params
+  const params = props.params;
+  const idParam = params ? String(params.id) : '';
   
   // Buscamos os dados usando a função auxiliar
-  const data = await getData(clienteIdStr);
+  const data = await getData(idParam);
   
   if ('redirect' in data) {
     redirect(data.redirect);

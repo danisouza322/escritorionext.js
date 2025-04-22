@@ -17,7 +17,9 @@ export async function GET(
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
-  const id = Number(params.id);
+  // Extrair o id de forma segura, convertendo para string primeiro
+  const idParam = String(params.id);
+  const id = Number(idParam);
 
   if (isNaN(id)) {
     return NextResponse.json(
@@ -63,7 +65,9 @@ export async function DELETE(
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
-  const id = Number(params.id);
+  // Extrair o id de forma segura, convertendo para string primeiro
+  const idParam = String(params.id);
+  const id = Number(idParam);
 
   if (isNaN(id)) {
     return NextResponse.json(
