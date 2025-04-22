@@ -29,7 +29,7 @@ export default async function ClienteDetalhesPage({
   const contabilidadeId = Number(session.user.contabilidadeId);
   
   // Verificar se o id é um número válido
-  const id = params.id;
+  const { id } = params;
   if (isNaN(Number(id)) || id === 'cadastrar') {
     redirect("/dashboard/clientes");
   }

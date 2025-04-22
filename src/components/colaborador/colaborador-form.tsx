@@ -114,10 +114,10 @@ export default function ColaboradorForm({ children }: ColaboradorFormProps) {
           <Button>Novo Colaborador</Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" aria-describedby="colaborador-form-description">
         <DialogHeader>
           <DialogTitle>Adicionar Colaborador</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="colaborador-form-description">
             Preencha os dados do novo membro da equipe.
           </DialogDescription>
         </DialogHeader>
