@@ -474,27 +474,23 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Responsável</h3>
-                <Select 
-                  value={novoResponsavel} 
-                  onValueChange={(value) => {
-                    setNovoResponsavel(value);
-                    handleResponsavelChange(value);
-                  }}
-                  disabled={atualizandoTarefa}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecionar responsável" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">Não atribuído</SelectItem>
-                    {colaboradores.map((colaborador) => (
-                      <SelectItem key={colaborador.id} value={colaborador.id.toString()}>
-                        {colaborador.nome}
-                      </SelectItem>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">Responsáveis</h3>
+                {tarefa.responsaveis && tarefa.responsaveis.length > 0 ? (
+                  <div className="space-y-1">
+                    {tarefa.responsaveis.map((resp) => (
+                      <div key={resp.id} className="flex items-center gap-2 text-sm">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback>
+                            {resp.usuario?.nome.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{resp.usuario?.nome}</span>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">Nenhum responsável atribuído</div>
+                )}
               </div>
               
               <div>
@@ -514,22 +510,7 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
               </div>
             </div>
             
-            {/* Seção de responsáveis adicionais */}
-            {tarefa.responsaveis && tarefa.responsaveis.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Responsáveis Adicionais</h3>
-                <div className="flex flex-wrap gap-2">
-                  {tarefa.responsaveis.map((respItem) => (
-                    <Badge key={respItem.id} variant="outline" className="flex items-center gap-1 px-3 py-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback className="text-xs">{respItem.usuario?.nome?.charAt(0) || "U"}</AvatarFallback>
-                      </Avatar>
-                      <span className="ml-1">{respItem.usuario?.nome || "Usuário"}</span>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+
             
             {tarefa.descricao && (
               <div>

@@ -16,15 +16,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/layout.js"
     ],
-    "/dashboard/tarefas/page": [
+    "/dashboard/tarefas/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/tarefas/page.js"
+      "static/chunks/app/dashboard/tarefas/[id]/page.js"
     ],
     "/api/auth/[...nextauth]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/auth/[...nextauth]/route.js"
+    ],
+    "/api/tarefas/[id]/observacoes/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/tarefas/[id]/observacoes/route.js"
+    ],
+    "/api/tarefas/[id]/arquivos/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/tarefas/[id]/arquivos/route.js"
     ]
   }
 }

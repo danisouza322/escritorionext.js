@@ -40,6 +40,11 @@ export default async function TarefaPage(props: PageProps) {
     with: {
       cliente: true,
       responsavel: true,
+      responsaveis: {
+        with: {
+          usuario: true,
+        },
+      },
     },
   });
 
