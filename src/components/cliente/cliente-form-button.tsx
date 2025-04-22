@@ -3,10 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import ClienteForm from "./cliente-form";
+import { Cliente } from "@/types";
 
-export default function ClienteFormButton() {
+interface ClienteFormButtonProps {
+  onSuccess?: (cliente: Cliente) => void;
+}
+
+export default function ClienteFormButton({ onSuccess }: ClienteFormButtonProps) {
   return (
-    <ClienteForm>
+    <ClienteForm onSuccess={onSuccess}>
       <Button className="gap-2">
         <UserPlus className="h-4 w-4" />
         Novo Cliente

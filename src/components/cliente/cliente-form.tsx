@@ -26,7 +26,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Select,
   SelectContent,
@@ -65,9 +65,16 @@ interface ClienteFormProps {
   cliente?: Cliente; // Cliente para edição
   onClose?: () => void; // Callback quando o modal é fechado
   onSuccess?: (cliente: Cliente) => void; // Callback após o sucesso
+  embedded?: boolean; // Se o formulário é embutido e não um modal
 }
 
-export default function ClienteForm({ children, cliente, onClose, onSuccess }: ClienteFormProps) {
+export default function ClienteForm({ 
+  children, 
+  cliente, 
+  onClose, 
+  onSuccess, 
+  embedded = false 
+}: ClienteFormProps) {
   const [isOpen, setIsOpen] = useState(cliente ? true : false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsultandoCNPJ, setIsConsultandoCNPJ] = useState(false);
@@ -235,14 +242,23 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
           throw new Error(errorData.error || "Erro ao criar cliente");
         }
 
+        const clienteCriado = await response.json();
+
         toast({
           title: "Cliente criado",
           description: "O cliente foi criado com sucesso",
         });
+
+        // Se temos uma função de sucesso, chamá-la com o cliente criado
+        if (onSuccess) {
+          onSuccess(clienteCriado);
+        }
       }
 
-      // Fechar modal e chamar callbacks
-      setIsOpen(false);
+      // Se for modal, fechá-lo
+      if (!embedded) {
+        setIsOpen(false);
+      }
       
       // Se for edição e temos uma função de sucesso, chamá-la
       if (cliente && onSuccess) {
@@ -251,12 +267,14 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
         if (fetchResponse.ok) {
           const clienteAtualizado = await fetchResponse.json();
           onSuccess(clienteAtualizado);
-        } else {
-          // Falha ao obter dados atualizados, apenas atualizar página
-          router.refresh();
         }
-      } else {
-        // Atualizar a página nos outros casos
+      }
+      
+      // Se não for modal e não houver callback de sucesso, redirecionar para a lista
+      if (embedded && !onSuccess) {
+        router.push('/dashboard/clientes');
+      } else if (!embedded && !cliente) {
+        // Se for modal de criação, recarregamos a página
         router.refresh();
       }
       
@@ -285,104 +303,159 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children || <Button>Novo Cliente</Button>}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px] max-h-[90vh] overflow-y-auto" aria-describedby="cliente-form-description">
-        <DialogHeader>
-          <DialogTitle>{cliente ? "Editar" : "Novo"} Cliente</DialogTitle>
-          <DialogDescription id="cliente-form-description">
-            Preencha os dados do cliente abaixo.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="tipo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Pessoa</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+  // Conteúdo do formulário que será usado em ambos os modos (modal e embutido)
+  const formContent = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="tipo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Pessoa</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="pessoa_juridica">Pessoa Jurídica</SelectItem>
+                    <SelectItem value="pessoa_fisica">Pessoa Física</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="documento"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{form.watch("tipo") === "pessoa_fisica" ? "CPF" : "CNPJ"}</FormLabel>
+                <div className="flex gap-2">
+                  <FormControl>
+                    <Input placeholder={form.watch("tipo") === "pessoa_fisica" ? "000.000.000-00" : "00.000.000/0000-00"} {...field} />
+                  </FormControl>
+                  
+                  {form.watch("tipo") === "pessoa_juridica" && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => consultarCNPJ(field.value)}
+                      disabled={isConsultandoCNPJ || !field.value}
+                      title="Consultar CNPJ"
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="pessoa_juridica">Pessoa Jurídica</SelectItem>
-                        <SelectItem value="pessoa_fisica">Pessoa Física</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="documento"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{form.watch("tipo") === "pessoa_fisica" ? "CPF" : "CNPJ"}</FormLabel>
-                    <div className="flex gap-2">
-                      <FormControl>
-                        <Input placeholder={form.watch("tipo") === "pessoa_fisica" ? "000.000.000-00" : "00.000.000/0000-00"} {...field} />
-                      </FormControl>
-                      
-                      {form.watch("tipo") === "pessoa_juridica" && (
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="icon"
-                          onClick={() => consultarCNPJ(field.value)}
-                          disabled={isConsultandoCNPJ || !field.value}
-                          title="Consultar CNPJ"
-                        >
-                          {isConsultandoCNPJ ? (
-                            <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                          ) : (
-                            <Search className="h-4 w-4" />
-                          )}
-                        </Button>
+                      {isConsultandoCNPJ ? (
+                        <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                      ) : (
+                        <Search className="h-4 w-4" />
                       )}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
+                    </Button>
+                  )}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="nome"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome</FormLabel>
+                <FormControl>
+                  <Input placeholder={form.watch("tipo") === "pessoa_fisica" ? "Nome completo" : "Razão Social"} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="email@exemplo.com" 
+                    type="email" 
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="telefone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Telefone</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="(00) 00000-0000"
+                    value={field.value || ""}  
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          {form.watch("tipo") === "pessoa_juridica" && (
+            <>
               <FormField
                 control={form.control}
-                name="nome"
+                name="data_abertura"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome</FormLabel>
+                    <FormLabel>Data de Abertura</FormLabel>
                     <FormControl>
-                      <Input placeholder={form.watch("tipo") === "pessoa_fisica" ? "Nome completo" : "Razão Social"} {...field} />
+                      <Input 
+                        placeholder="01/01/2000"
+                        value={field.value || ""}  
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+            
               <FormField
                 control={form.control}
-                name="email"
+                name="natureza_juridica"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Natureza Jurídica</FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="email@exemplo.com" 
-                        type="email" 
-                        value={field.value || ""}
+                        placeholder="Ex: Sociedade Empresária Limitada"
+                        value={field.value || ""}  
                         onChange={field.onChange}
                         onBlur={field.onBlur}
                         name={field.name}
@@ -396,184 +469,221 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
               
               <FormField
                 control={form.control}
-                name="telefone"
+                name="atividade_principal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Telefone</FormLabel>
+                    <FormLabel>Atividade Principal</FormLabel>
                     <FormControl>
-                      <Input placeholder="(00) 00000-0000" {...field} />
+                      <Input 
+                        placeholder="Ex: Comércio varejista de..."
+                        value={field.value || ""}  
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              {form.watch("tipo") === "pessoa_juridica" && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="data_abertura"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de Abertura</FormLabel>
-                        <FormControl>
-                          <Input placeholder="01/01/2000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                
-                  <FormField
-                    control={form.control}
-                    name="natureza_juridica"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Natureza Jurídica</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Sociedade Empresária Limitada" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <FormField
+                control={form.control}
+                name="simples_nacional"
+                render={({ field }) => {
+                  // Usando o valor observado para garantir a reatividade do componente
+                  const currentValue = form.watch("simples_nacional");
+                  console.log('Valor atual do Simples Nacional:', currentValue);
                   
-                  <FormField
-                    control={form.control}
-                    name="atividade_principal"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Atividade Principal</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Comércio varejista de..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  // Certificar-se de que é um valor válido
+                  const safeValue = currentValue === "sim" ? "sim" : "nao";
                   
-                  <FormField
-                    control={form.control}
-                    name="simples_nacional"
-                    render={({ field }) => {
-                      // Usando o valor observado para garantir a reatividade do componente
-                      const currentValue = form.watch("simples_nacional");
-                      console.log('Valor atual do Simples Nacional:', currentValue);
-                      
-                      // Certificar-se de que é um valor válido
-                      const safeValue = currentValue === "sim" ? "sim" : "nao";
-                      
-                      return (
-                        <FormItem>
-                          <FormLabel>Optante pelo Simples Nacional</FormLabel>
-                          <Select
-                            onValueChange={(value) => {
-                              // Garante que a atualização é aplicada corretamente
-                              field.onChange(value);
-                              console.log('Simples Nacional alterado para:', value);
-                            }}
-                            value={safeValue}
-                            defaultValue="nao"
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione..." />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="sim">Sim</SelectItem>
-                              <SelectItem value="nao">Não</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      );
-                    }}
+                  return (
+                    <FormItem>
+                      <FormLabel>Optante pelo Simples Nacional</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          // Garante que a atualização é aplicada corretamente
+                          field.onChange(value);
+                          console.log('Simples Nacional alterado para:', value);
+                        }}
+                        value={safeValue}
+                        defaultValue="nao"
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="sim">Sim</SelectItem>
+                          <SelectItem value="nao">Não</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            </>
+          )}
+          
+          <FormField
+            control={form.control}
+            name="endereco"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Endereço</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Rua, número, complemento"
+                    value={field.value || ""}  
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
                   />
-                </>
-              )}
-              
-              <FormField
-                control={form.control}
-                name="endereco"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Endereço</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Rua, número, complemento" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="cidade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cidade</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Cidade" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="estado"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                    <FormControl>
-                      <Input placeholder="UF" maxLength={2} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="cep"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CEP</FormLabel>
-                    <FormControl>
-                      <Input placeholder="00000-000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="observacoes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Informações adicionais sobre o cliente" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <DialogFooter>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="cidade"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cidade</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Cidade"
+                    value={field.value || ""}  
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="estado"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="UF" 
+                    maxLength={2}
+                    value={field.value || ""}  
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="cep"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CEP</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="00000-000"
+                    value={field.value || ""}  
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        <FormField
+          control={form.control}
+          name="observacoes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Observações</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Informações adicionais sobre o cliente"
+                  value={field.value || ""}  
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <div className="flex justify-end gap-2">
+          {embedded ? (
+            <>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => router.push('/dashboard/clientes')}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Salvando..." : "Salvar Cliente"}
+              </Button>
+            </>
+          ) : (
+            <>
               <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Salvando..." : "Salvar"}
               </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            </>
+          )}
+        </div>
+      </form>
+    </Form>
+  );
+
+  // Se o formulário é embutido (não é um modal), renderizar diretamente
+  if (embedded) {
+    return formContent;
+  }
+  
+  // Caso contrário, renderizar como um modal
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        {children || <Button>Novo Cliente</Button>}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{cliente ? "Editar" : "Novo"} Cliente</DialogTitle>
+          <DialogDescription>
+            Preencha os dados do cliente abaixo.
+          </DialogDescription>
+        </DialogHeader>
+        {formContent}
       </DialogContent>
     </Dialog>
   );

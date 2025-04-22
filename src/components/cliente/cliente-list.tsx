@@ -15,8 +15,10 @@ import { Cliente } from "@/types";
 import { formataDocumento, getTipoClienteLabel } from "@/lib/utils";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, Pencil, MoreHorizontal } from "lucide-react";
+import { Search, Eye, Pencil, UserPlus } from "lucide-react";
 import ClienteForm from "./cliente-form";
+import RemoveClienteButton from "./remove-cliente-button";
+import { useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -33,6 +35,7 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
   const [searchTerm, setSearchTerm] = useState("");
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>(clientesIniciais);
+  const router = useRouter();
   
   // Buscar detalhes do cliente para edição
   const buscarDetalhesCliente = async (clienteId: number) => {
@@ -66,15 +69,30 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
 
   // Função para atualizar a lista local após edição bem-sucedida
   const atualizarListaClientes = (clienteAtualizado: Cliente) => {
-    // Atualizamos o cliente na lista local sem recarregar a página
-    setClientes(clientesAtuais => 
-      clientesAtuais.map(c => 
-        c.id === clienteAtualizado.id ? clienteAtualizado : c
-      )
-    );
+    // Verificamos se o cliente já existe na lista
+    const clienteExisteNaLista = clientes.some(c => c.id === clienteAtualizado.id);
+    
+    if (clienteExisteNaLista) {
+      // Se o cliente já existe, atualizamos ele na lista
+      setClientes(clientesAtuais => 
+        clientesAtuais.map(c => 
+          c.id === clienteAtualizado.id ? clienteAtualizado : c
+        )
+      );
+    } else {
+      // Se o cliente não existe, adicionamos ele à lista
+      setClientes(clientesAtuais => [clienteAtualizado, ...clientesAtuais]);
+    }
     
     // Fechamos o modal após a edição
     limparClienteSelecionado();
+  };
+  
+  // Função para remover cliente da lista local após remoção bem-sucedida
+  const removerClienteDaLista = (clienteId: number) => {
+    setClientes(clientesAtuais => 
+      clientesAtuais.filter(c => c.id !== clienteId)
+    );
   };
 
   return (
@@ -88,14 +106,25 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
         />
       )}
       
-      <div className="flex items-center gap-2">
-        <Search className="w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por nome, documento ou email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Search className="w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome, documento ou email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+        </div>
+        
+        <Button 
+          variant="default" 
+          className="gap-2"
+          onClick={() => router.push('/dashboard/clientes/novo')}
+        >
+          <UserPlus className="h-4 w-4" />
+          Novo Cliente
+        </Button>
       </div>
       
       <div className="border rounded-md">
@@ -148,6 +177,11 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only md:not-sr-only">Editar</span>
                       </Button>
+                      <RemoveClienteButton 
+                        id={cliente.id} 
+                        nome={cliente.nome}
+                        onSuccess={() => removerClienteDaLista(cliente.id)}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
