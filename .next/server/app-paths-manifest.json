@@ -1,12 +1,6 @@
 {
-  "/api/clientes/route": "app/api/clientes/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/page": "app/page.js",
   "/auth/page": "app/auth/page.js",
-  "/dashboard/clientes/cadastrar/page": "app/dashboard/clientes/cadastrar/page.js",
-  "/dashboard/clientes/page": "app/dashboard/clientes/page.js",
-  "/dashboard/clientes/[id]/page": "app/dashboard/clientes/[id]/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/documentos/page": "app/dashboard/documentos/page.js",
-  "/dashboard/tarefas/page": "app/dashboard/tarefas/page.js"
+  "/dashboard/clientes/page": "app/dashboard/clientes/page.js"
 }

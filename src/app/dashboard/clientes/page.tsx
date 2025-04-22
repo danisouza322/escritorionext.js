@@ -4,10 +4,9 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { clientes } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { Button } from "@/components/ui/button";
 import ClienteList from "@/components/cliente/cliente-list";
-import { UserPlus } from "lucide-react";
-import Link from "next/link";
+import ClienteFormButton from "@/components/cliente/cliente-form-button";
+import { Cliente } from "@/types";
 
 export default async function ClientesPage() {
   const session = await getServerSession(authOptions);
@@ -37,12 +36,7 @@ export default async function ClientesPage() {
             Gerencie seus clientes e seus dados
           </p>
         </div>
-        <Link href="/dashboard/clientes/cadastrar">
-          <Button className="gap-2">
-            <UserPlus className="h-4 w-4" />
-            Novo Cliente
-          </Button>
-        </Link>
+        <ClienteFormButton />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -60,7 +54,7 @@ export default async function ClientesPage() {
         </div>
       </div>
       
-      <ClienteList clientes={clientesList} />
+      <ClienteList clientes={clientesList as Cliente[]} />
     </div>
   );
 }
