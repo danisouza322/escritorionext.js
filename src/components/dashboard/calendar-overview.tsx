@@ -34,10 +34,10 @@ export default function CalendarOverview({ tarefas }: CalendarOverviewProps) {
         <div>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Próximas Obrigações
+            Minhas Próximas Obrigações
           </CardTitle>
           <CardDescription>
-            Calendário de vencimentos para os próximos 30 dias
+            Calendário de suas tarefas com vencimento nos próximos 30 dias
           </CardDescription>
         </div>
         <Link href="/dashboard/calendario">

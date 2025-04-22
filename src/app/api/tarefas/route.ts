@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { tarefas } from "@/db/schema";
-import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { eq, desc, and, gte, lte, or } from "drizzle-orm";
 import { z } from "zod";
 
 // Validação dos dados de tarefa
@@ -29,24 +29,27 @@ export async function GET(request: Request) {
     }
 
     const contabilidadeId = Number(session.user.contabilidadeId);
+    const usuarioId = Number(session.user.id);
     const { searchParams } = new URL(request.url);
     
     // Parâmetros para filtragem
     const clienteId = searchParams.get("clienteId");
-    const responsavelId = searchParams.get("responsavelId");
     const status = searchParams.get("status");
     const dataInicio = searchParams.get("dataInicio");
     const dataFim = searchParams.get("dataFim");
+    const todos = searchParams.get("todos") === "true"; // Para permitir buscar todas as tarefas quando necessário
     
     // Construir condições de consulta
     let conditions = [eq(tarefas.contabilidadeId, contabilidadeId)];
     
-    if (clienteId) {
-      conditions.push(eq(tarefas.clienteId, Number(clienteId)));
+    // Filtrar apenas tarefas onde o usuário é responsável
+    // A não ser que a query 'todos' seja passada como true
+    if (!todos) {
+      conditions.push(eq(tarefas.responsavelId, usuarioId));
     }
     
-    if (responsavelId) {
-      conditions.push(eq(tarefas.responsavelId, Number(responsavelId)));
+    if (clienteId) {
+      conditions.push(eq(tarefas.clienteId, Number(clienteId)));
     }
     
     if (status) {
@@ -87,6 +90,7 @@ export async function POST(request: Request) {
     }
 
     const contabilidadeId = Number(session.user.contabilidadeId);
+    const usuarioId = Number(session.user.id);
     const body = await request.json();
     
     // Valida os dados recebidos
@@ -103,6 +107,8 @@ export async function POST(request: Request) {
     const dadosTarefa = {
       ...validacao.data,
       contabilidadeId,
+      // Se não for especificado um responsável, define o usuário atual como responsável
+      responsavelId: validacao.data.responsavelId || usuarioId,
       dataVencimento: validacao.data.dataVencimento
         ? new Date(validacao.data.dataVencimento)
         : null,

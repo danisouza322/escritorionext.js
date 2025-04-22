@@ -17,6 +17,7 @@ export default async function DashboardPage() {
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
+  const usuarioId = Number(session.user.id);
   
   // Buscar estatísticas (apenas clientes ativos)
   const totalClientes = await db.query.clientes.findMany({
@@ -30,23 +31,30 @@ export default async function DashboardPage() {
     where: eq(documentos.contabilidadeId, contabilidadeId),
   }).then(res => res.length);
   
+  // Buscar tarefas pendentes onde o usuário é responsável
   const tarefasEmAberto = await db.query.tarefas.findMany({
     where: and(
       eq(tarefas.contabilidadeId, contabilidadeId),
-      eq(tarefas.status, "pendente")
+      eq(tarefas.status, "pendente"),
+      eq(tarefas.responsavelId, usuarioId)
     ),
   }).then(res => res.length);
   
+  // Buscar tarefas atrasadas onde o usuário é responsável
   const tarefasAtrasadas = await db.query.tarefas.findMany({
     where: and(
       eq(tarefas.contabilidadeId, contabilidadeId),
-      eq(tarefas.status, "atrasada")
+      eq(tarefas.status, "atrasada"),
+      eq(tarefas.responsavelId, usuarioId)
     ),
   }).then(res => res.length);
   
-  // Obter tarefas recentes
+  // Obter tarefas recentes onde o usuário é responsável
   const tarefasRecentes = await db.query.tarefas.findMany({
-    where: eq(tarefas.contabilidadeId, contabilidadeId),
+    where: and(
+      eq(tarefas.contabilidadeId, contabilidadeId),
+      eq(tarefas.responsavelId, usuarioId)
+    ),
     orderBy: [desc(tarefas.dataCriacao)],
     limit: 5,
     with: {
@@ -65,7 +73,7 @@ export default async function DashboardPage() {
     limit: 5,
   });
   
-  // Tarefas para o calendário (próximos 30 dias)
+  // Tarefas para o calendário (próximos 30 dias) onde o usuário é responsável
   const hoje = new Date();
   const trintaDiasAFrente = new Date(hoje);
   trintaDiasAFrente.setDate(hoje.getDate() + 30);
@@ -73,6 +81,7 @@ export default async function DashboardPage() {
   const proximasTarefas = await db.query.tarefas.findMany({
     where: and(
       eq(tarefas.contabilidadeId, contabilidadeId),
+      eq(tarefas.responsavelId, usuarioId),
       gte(tarefas.dataVencimento, hoje),
       lte(tarefas.dataVencimento, trintaDiasAFrente)
     ),

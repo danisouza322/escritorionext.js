@@ -44,26 +44,26 @@ export default function StatsCards({
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Tarefas Pendentes</CardTitle>
+          <CardTitle className="text-sm font-medium">Minhas Tarefas Pendentes</CardTitle>
           <FolderKanban className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{tarefasEmAberto}</div>
           <p className="text-xs text-muted-foreground">
-            Tarefas a serem realizadas
+            Tarefas pendentes sob sua responsabilidade
           </p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Tarefas Atrasadas</CardTitle>
+          <CardTitle className="text-sm font-medium">Minhas Tarefas Atrasadas</CardTitle>
           <AlertCircle className="h-4 w-4 text-destructive" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-destructive">{tarefasAtrasadas}</div>
           <p className="text-xs text-muted-foreground">
-            Tarefas com prazo excedido
+            Suas tarefas com prazo excedido
           </p>
         </CardContent>
       </Card>

@@ -15,9 +15,9 @@ export default function RecentTasks({ tarefas }: RecentTasksProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle>Tarefas Recentes</CardTitle>
+          <CardTitle>Minhas Tarefas Recentes</CardTitle>
           <CardDescription>
-            Últimas tarefas adicionadas ao sistema
+            Suas tarefas mais recentes no sistema
           </CardDescription>
         </div>
         <Link href="/dashboard/tarefas">

@@ -17,10 +17,14 @@ export default async function TarefasPage() {
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
+  const usuarioId = Number(session.user.id);
   
-  // Buscar tarefas
+  // Buscar tarefas onde o usuário é responsável
   const tarefasList = await db.query.tarefas.findMany({
-    where: eq(tarefas.contabilidadeId, contabilidadeId),
+    where: and(
+      eq(tarefas.contabilidadeId, contabilidadeId),
+      eq(tarefas.responsavelId, usuarioId)
+    ),
     orderBy: [desc(tarefas.dataCriacao)],
     with: {
       cliente: true,

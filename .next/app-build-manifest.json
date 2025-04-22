@@ -21,25 +21,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/tarefas/page.js"
     ],
-    "/dashboard/page": [
+    "/dashboard/tarefas/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/page.js"
+      "static/chunks/app/dashboard/tarefas/[id]/page.js"
     ],
     "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/dashboard/tarefas/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/tarefas/[id]/page.js"
-    ],
     "/api/tarefas/[id]/observacoes/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/tarefas/[id]/observacoes/route.js"
+    ],
+    "/api/tarefas/[id]/arquivos/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/tarefas/[id]/arquivos/route.js"
     ]
   }
 }
