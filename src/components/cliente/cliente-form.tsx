@@ -50,7 +50,7 @@ const clienteSchema = z.object({
   data_abertura: z.string().optional().or(z.literal("")),
   natureza_juridica: z.string().optional().or(z.literal("")),
   atividade_principal: z.string().optional().or(z.literal("")),
-  simples_nacional: z.enum(["sim", "nao"]).optional().or(z.literal("")),
+  simples_nacional: z.enum(["sim", "nao"]).optional().nullable(),
   observacoes: z.string().optional().or(z.literal("")),
 });
 
@@ -73,7 +73,9 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
   // Valor inicial do formulário
   const defaultValues: Partial<ClienteFormValues> = cliente
     ? {
-        ...cliente,
+        tipo: cliente.tipo as "pessoa_juridica" | "pessoa_fisica",
+        nome: cliente.nome,
+        documento: cliente.documento,
         email: cliente.email || "",
         telefone: cliente.telefone || "",
         endereco: cliente.endereco || "",
@@ -83,7 +85,7 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
         data_abertura: cliente.data_abertura || "",
         natureza_juridica: cliente.natureza_juridica || "",
         atividade_principal: cliente.atividade_principal || "",
-        simples_nacional: cliente.simples_nacional || "nao",
+        simples_nacional: (cliente.simples_nacional === "sim" ? "sim" : "nao") as "sim" | "nao",
         observacoes: cliente.observacoes || "",
       }
     : {
@@ -148,14 +150,24 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
       // Atualiza a seleção do Simples Nacional imediatamente no formulário
       console.log('Simples Nacional da API:', data.simples_nacional);
       
-      // Força a atualização do campo com maior prioridade
-      setTimeout(() => {
-        if (data.simples_nacional === 'sim') {
-          form.setValue("simples_nacional", "sim", { shouldDirty: true, shouldTouch: true });
-        } else {
-          form.setValue("simples_nacional", "nao", { shouldDirty: true, shouldTouch: true });
-        }
-      }, 10);
+      // Força a atualização do campo diretamente
+      try {
+        const simples = data.simples_nacional === 'sim' ? 'sim' : 'nao';
+        
+        // Atualizar o valor e forçar renderização
+        form.setValue("simples_nacional", simples, { 
+          shouldDirty: true, 
+          shouldTouch: true,
+          shouldValidate: true
+        });
+        
+        // Forçar atualização do form state
+        form.trigger("simples_nacional");
+        
+        console.log('Definido simples_nacional para:', simples);
+      } catch (error) {
+        console.error('Erro ao atualizar simples_nacional:', error);
+      }
       
       toast({
         title: "CNPJ Consultado",
@@ -188,7 +200,9 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
         });
 
         if (!response.ok) {
-          throw new Error("Erro ao atualizar cliente");
+          const errorData = await response.json().catch(() => ({}));
+          console.error("Erro:", errorData);
+          throw new Error(errorData.error || "Erro ao atualizar cliente");
         }
 
         toast({
@@ -198,6 +212,11 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
       } 
       // Se for criação
       else {
+        // Certifique-se de que o simples_nacional é uma das opções permitidas
+        if (data.simples_nacional !== "sim" && data.simples_nacional !== "nao") {
+          data.simples_nacional = "nao";
+        }
+        
         const response = await fetch("/api/clientes", {
           method: "POST",
           headers: {
@@ -207,7 +226,9 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
         });
 
         if (!response.ok) {
-          throw new Error("Erro ao criar cliente");
+          const errorData = await response.json().catch(() => ({}));
+          console.error("Erro:", errorData);
+          throw new Error(errorData.error || "Erro ao criar cliente");
         }
 
         toast({
@@ -243,7 +264,7 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
       console.error("Erro:", error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao salvar o cliente",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao salvar o cliente",
         variant: "destructive",
       });
     } finally {
@@ -427,12 +448,19 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
                       const currentValue = form.watch("simples_nacional");
                       console.log('Valor atual do Simples Nacional:', currentValue);
                       
+                      // Certificar-se de que é um valor válido
+                      const safeValue = currentValue === "sim" ? "sim" : "nao";
+                      
                       return (
                         <FormItem>
                           <FormLabel>Optante pelo Simples Nacional</FormLabel>
                           <Select
-                            onValueChange={field.onChange}
-                            value={currentValue || "nao"}
+                            onValueChange={(value) => {
+                              // Garante que a atualização é aplicada corretamente
+                              field.onChange(value);
+                              console.log('Simples Nacional alterado para:', value);
+                            }}
+                            value={safeValue}
                             defaultValue="nao"
                           >
                             <FormControl>

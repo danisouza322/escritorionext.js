@@ -76,7 +76,7 @@ export async function GET(request: Request) {
     
     // Log para debug
     console.log('Dados retornados da API CNPJA:', JSON.stringify(data, null, 2));
-    console.log('Simples Nacional:', data?.simples?.optant === true ? 'SIM' : 'NÃO');
+    console.log('Simples Nacional:', data?.company?.simples?.optant === true ? 'SIM' : 'NÃO');
     
     // Formata os dados para retornar para o cliente
     const formattedData = {
@@ -96,8 +96,8 @@ export async function GET(request: Request) {
       natureza_juridica: data.legalNature?.text || '',
       atividade_principal: data.mainActivity?.text || '',
       atividades_secundarias: data.sideActivities?.map((activity: any) => activity.text).join(', ') || '',
-      simples_nacional: data.simples?.optant === true ? 'sim' : 'nao',
-      mei: data.simples?.mei === true ? 'sim' : 'nao',
+      simples_nacional: data.company?.simples?.optant === true ? 'sim' : 'nao',
+      mei: data.company?.simei?.optant === true ? 'sim' : 'nao',
       capital_social: data.capital || '',
       raw: data // Inclui todos os dados brutos para uso avançado, se necessário
     };
