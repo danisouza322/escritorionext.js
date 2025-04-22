@@ -108,6 +108,11 @@ export const clientes = pgTable("clientes", {
   cidade: varchar("cidade", { length: 100 }),
   estado: varchar("estado", { length: 2 }),
   cep: varchar("cep", { length: 10 }),
+  // Novos campos para pessoa jurídica
+  data_abertura: varchar("data_abertura", { length: 20 }),
+  natureza_juridica: varchar("natureza_juridica", { length: 255 }),
+  atividade_principal: text("atividade_principal"),
+  simples_nacional: varchar("simples_nacional", { length: 3 }).default("nao"),
   observacoes: text("observacoes"),
   ativo: boolean("ativo").default(true),
   dataCriacao: timestamp("data_criacao").defaultNow(),

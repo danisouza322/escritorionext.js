@@ -45,6 +45,11 @@ export type Cliente = {
   cidade?: string | null;
   estado?: string | null;
   cep?: string | null;
+  // Novos campos para pessoa jurídica
+  data_abertura?: string | null;
+  natureza_juridica?: string | null;
+  atividade_principal?: string | null;
+  simples_nacional?: string | null;
   observacoes?: string | null;
   ativo: boolean;
   dataCriacao: Date;

@@ -146,8 +146,16 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
       form.setValue("atividade_principal", data.atividade_principal || "");
       
       // Atualiza a seleção do Simples Nacional imediatamente no formulário
-      const simples = data.simples_nacional === 'sim' ? 'sim' : 'nao';
-      form.setValue("simples_nacional", simples);
+      console.log('Simples Nacional da API:', data.simples_nacional);
+      
+      // Força a atualização do campo com maior prioridade
+      setTimeout(() => {
+        if (data.simples_nacional === 'sim') {
+          form.setValue("simples_nacional", "sim", { shouldDirty: true, shouldTouch: true });
+        } else {
+          form.setValue("simples_nacional", "nao", { shouldDirty: true, shouldTouch: true });
+        }
+      }, 10);
       
       toast({
         title: "CNPJ Consultado",
@@ -414,26 +422,33 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
                   <FormField
                     control={form.control}
                     name="simples_nacional"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Optante pelo Simples Nacional</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || "nao"}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="sim">Sim</SelectItem>
-                            <SelectItem value="nao">Não</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      // Usando o valor observado para garantir a reatividade do componente
+                      const currentValue = form.watch("simples_nacional");
+                      console.log('Valor atual do Simples Nacional:', currentValue);
+                      
+                      return (
+                        <FormItem>
+                          <FormLabel>Optante pelo Simples Nacional</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={currentValue || "nao"}
+                            defaultValue="nao"
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="sim">Sim</SelectItem>
+                              <SelectItem value="nao">Não</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </>
               )}

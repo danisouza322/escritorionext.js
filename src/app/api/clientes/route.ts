@@ -17,6 +17,11 @@ const clienteSchema = z.object({
   cidade: z.string().optional().nullable(),
   estado: z.string().optional().nullable(),
   cep: z.string().optional().nullable(),
+  // Novos campos para pessoa jurídica
+  data_abertura: z.string().optional().nullable(),
+  natureza_juridica: z.string().optional().nullable(),
+  atividade_principal: z.string().optional().nullable(),
+  simples_nacional: z.enum(["sim", "nao"]).optional().nullable(),
   observacoes: z.string().optional().nullable(),
 });
 
