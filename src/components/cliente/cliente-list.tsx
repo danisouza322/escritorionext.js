@@ -117,14 +117,7 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
           />
         </div>
         
-        <Button 
-          variant="default" 
-          className="gap-2"
-          onClick={() => router.push('/dashboard/clientes/novo')}
-        >
-          <UserPlus className="h-4 w-4" />
-          Novo Cliente
-        </Button>
+        {/* Botão de novo cliente movido para a página principal */}
       </div>
       
       <div className="border rounded-md">
