@@ -1,0 +1,81 @@
+SaaS de Contabilidade em Next.js
+Visão Geral do Sistema
+Desenvolver uma aplicação SaaS para escritórios de contabilidade usando Next.js, com funcionalidades para gerenciar clientes, arquivos, tarefas e colaboradores. O sistema deve ter uma dashboard moderna e intuitiva.
+Requisitos Funcionais
+Módulo de Autenticação e Gestão de Contabilidades
+
+Sistema de registro e login para escritórios de contabilidade
+Perfil da contabilidade com informações como: razão social, CNPJ, endereço, responsáveis, plano contratado
+Gerenciamento de configurações da conta e faturamento
+
+Módulo de Clientes
+
+Cadastro completo de clientes (pessoa física e jurídica)
+Visualização e histórico de serviços prestados por cliente
+Documentos associados a cada cliente
+Métricas e relatórios financeiros por cliente
+
+Módulo de Gerenciamento de Arquivos
+
+Upload e organização de documentos fiscais e contábeis
+Sistema de pastas organizadas por cliente/período/tipo
+Versionamento de documentos
+Possibilidade de compartilhamento com clientes via link seguro
+Integração com serviços de armazenamento em nuvem (opcional)
+
+Módulo de Tarefas
+
+Criação e atribuição de tarefas aos colaboradores
+Calendário de obrigações fiscais e contábeis
+Sistema de notificações e lembretes
+Fluxos de trabalho personalizáveis
+Visualização de status e progresso das tarefas
+
+Módulo de Colaboradores
+
+Gestão de usuários internos do escritório
+Níveis de permissão diferenciados (admin, contador, assistente)
+Monitoramento de produtividade
+Sistema de alocação de recursos por cliente/projeto
+
+Dashboard Principal
+
+Visão consolidada das métricas importantes
+Tarefas pendentes e próximos vencimentos
+Status dos clientes e seus documentos
+Gráficos de desempenho e faturamento
+
+Requisitos Técnicos
+Stack Tecnológica
+
+Next.js com App Router para frontend e API routes
+TypeScript para tipagem segura
+Prisma ou Drizzle ORM para banco de dados
+PostgreSQL como banco de dados principal
+NextAuth.js para autenticação
+Tailwind CSS + shadcn/ui para interface
+Tanstack Query para gerenciamento de estado
+React Hook Form para formulários
+Zod para validação de dados
+
+Arquitetura
+
+Design baseado em componentes reutilizáveis
+API RESTful com endpoints bem definidos
+Sistema multi-tenant para separação de dados entre escritórios
+Implementação de medidas de segurança robustas
+
+UI/UX
+
+Interface limpa e moderna seguindo princípios de Material Design ou Fluent Design
+Layout responsivo para acesso via desktop e dispositivos móveis
+Tema claro/escuro
+Painéis e componentes arrastáveis para personalização da dashboard
+Filtros avançados em todas as listagens
+
+Funcionalidades Adicionais (Prioritárias)
+
+Sistema de geração de relatórios personalizados
+Integração com sistemas da Receita Federal e outros órgãos
+Chat interno para comunicação entre colaboradores
+Portal do cliente para acesso limitado e aprovações
