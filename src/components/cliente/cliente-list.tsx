@@ -52,8 +52,12 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
     }
   };
   
-  // Filtrar clientes com base no termo de busca
+  // Filtrar clientes com base no termo de busca e mostrar apenas ativos
   const clientesFiltrados = clientes.filter((cliente) => {
+    // Primeiro filtramos apenas clientes ativos
+    if (!cliente.ativo) return false;
+    
+    // Depois aplicamos o filtro de busca
     const searchTermLower = searchTerm.toLowerCase();
     return (
       cliente.nome.toLowerCase().includes(searchTermLower) ||
@@ -88,10 +92,12 @@ export default function ClienteList({ clientes: clientesIniciais }: ClienteListP
     limparClienteSelecionado();
   };
   
-  // Função para remover cliente da lista local após remoção bem-sucedida
+  // Função para marcar cliente como inativo na lista local após remoção bem-sucedida
   const removerClienteDaLista = (clienteId: number) => {
     setClientes(clientesAtuais => 
-      clientesAtuais.filter(c => c.id !== clienteId)
+      clientesAtuais.map(c => 
+        c.id === clienteId ? { ...c, ativo: false } : c
+      )
     );
   };
 
