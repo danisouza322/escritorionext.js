@@ -99,13 +99,10 @@ export default function CalendarioPage() {
           </CardHeader>
           <CardContent>
             <CalendarSimple
-              mode="single"
               selected={data}
-              onSelect={(date) => {
+              onSelect={(date: Date) => {
                 setData(date);
-                if (date) {
-                  filtrarTarefasPorData(date);
-                }
+                filtrarTarefasPorData(date);
               }}
               className="rounded-md border"
               modifiers={{
