@@ -42,6 +42,28 @@ async function createTableIfNotExists(pool, tableName, tableDefinition) {
   }
 }
 
+// Função para adicionar uma coluna se ela não existir
+async function addColumnIfNotExists(pool, tableName, columnName, columnDefinition) {
+  try {
+    // Verificar se a coluna já existe
+    const checkResult = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = $1 AND column_name = $2;
+    `, [tableName, columnName]);
+    
+    if (checkResult.rows.length === 0) {
+      console.log(`Adicionando coluna ${columnName} à tabela ${tableName}...`);
+      await pool.query(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition};`);
+      console.log(`Coluna ${columnName} adicionada com sucesso!`);
+    } else {
+      console.log(`Coluna ${columnName} já existe na tabela ${tableName}.`);
+    }
+  } catch (error) {
+    console.error(`Erro ao adicionar a coluna ${columnName}:`, error.message);
+  }
+}
+
 async function main() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   
@@ -98,6 +120,10 @@ async function main() {
       cidade VARCHAR(100),
       estado VARCHAR(2),
       cep VARCHAR(10),
+      data_abertura VARCHAR(20),
+      natureza_juridica VARCHAR(255),
+      atividade_principal TEXT,
+      simples_nacional VARCHAR(3) DEFAULT 'nao',
       observacoes TEXT,
       ativo BOOLEAN DEFAULT TRUE,
       data_criacao TIMESTAMP DEFAULT NOW(),
@@ -139,6 +165,12 @@ async function main() {
       data_criacao TIMESTAMP DEFAULT NOW(),
       data_atualizacao TIMESTAMP DEFAULT NOW()
     `);
+    
+    // Adicionar colunas à tabela clientes se ela já existir
+    await addColumnIfNotExists(pool, 'clientes', 'data_abertura', 'VARCHAR(20)');
+    await addColumnIfNotExists(pool, 'clientes', 'natureza_juridica', 'VARCHAR(255)');
+    await addColumnIfNotExists(pool, 'clientes', 'atividade_principal', 'TEXT');
+    await addColumnIfNotExists(pool, 'clientes', 'simples_nacional', 'VARCHAR(3) DEFAULT \'nao\'');
     
     console.log('Migração concluída com sucesso!');
   } catch (error) {
