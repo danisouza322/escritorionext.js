@@ -66,3 +66,22 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Cores personalizadas para o sistema de contabilidade */
+@layer utilities {
+  .bg-contabil-primary {
+    @apply bg-blue-600;
+  }
+  .bg-contabil-secondary {
+    @apply bg-blue-500;
+  }
+  .bg-contabil-accent {
+    @apply bg-blue-400;
+  }
+  .text-contabil-primary {
+    @apply text-blue-600;
+  }
+  .border-contabil {
+    @apply border-blue-600;
+  }
+}
