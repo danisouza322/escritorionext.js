@@ -4,6 +4,7 @@ import { contabilidades, usuarios } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { hash } from "bcrypt";
+import { sql } from "drizzle-orm";
 
 // Validação para criar contabilidade
 const contabilidadeSchema = z.object({
@@ -40,9 +41,12 @@ export async function POST(request: Request) {
     }
 
     // Verificar se CNPJ já existe
-    const contabilidadeExistente = await db.query.contabilidades.findFirst({
-      where: eq(contabilidades.cnpj, validacao.data.cnpj),
-    });
+    const contabilidadesResult = await db
+      .select()
+      .from(contabilidades)
+      .where(eq(contabilidades.cnpj, validacao.data.cnpj));
+    
+    const contabilidadeExistente = contabilidadesResult.length > 0 ? contabilidadesResult[0] : null;
 
     if (contabilidadeExistente) {
       return NextResponse.json(
@@ -52,9 +56,12 @@ export async function POST(request: Request) {
     }
 
     // Verificar se email já existe
-    const usuarioExistente = await db.query.usuarios.findFirst({
-      where: eq(usuarios.email, validacao.data.usuario.email),
-    });
+    const usuariosResult = await db
+      .select()
+      .from(usuarios)
+      .where(eq(usuarios.email, validacao.data.usuario.email));
+    
+    const usuarioExistente = usuariosResult.length > 0 ? usuariosResult[0] : null;
 
     if (usuarioExistente) {
       return NextResponse.json(
