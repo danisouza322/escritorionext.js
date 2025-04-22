@@ -73,7 +73,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   db: () => (/* binding */ db)\n/* harmony export */ });\n/* harmony import */ var drizzle_orm_postgres_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! drizzle-orm/postgres-js */ \"(rsc)/./node_modules/drizzle-orm/postgres-js/driver.js\");\n/* harmony import */ var postgres__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! postgres */ \"(rsc)/./node_modules/postgres/src/index.js\");\n/* harmony import */ var _db_schema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../db/schema */ \"(rsc)/./src/db/schema.ts\");\n\n\n\n// Verificação das variáveis de ambiente\nif (!process.env.DATABASE_URL) {\n    throw new Error(\"DATABASE_URL não está definida\");\n}\n// Conexão com o banco de dados\nconst connectionString = process.env.DATABASE_URL;\nconst client = (0,postgres__WEBPACK_IMPORTED_MODULE_0__[\"default\"])(connectionString);\nconst db = (0,drizzle_orm_postgres_js__WEBPACK_IMPORTED_MODULE_2__.drizzle)(client, {\n    schema: _db_schema__WEBPACK_IMPORTED_MODULE_1__\n});\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHJzYykvLi9zcmMvbGliL2RiLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7QUFBa0Q7QUFDbEI7QUFDTztBQUV2Qyx3Q0FBd0M7QUFDeEMsSUFBSSxDQUFDRyxRQUFRQyxHQUFHLENBQUNDLFlBQVksRUFBRTtJQUM3QixNQUFNLElBQUlDLE1BQU07QUFDbEI7QUFFQSwrQkFBK0I7QUFDL0IsTUFBTUMsbUJBQW1CSixRQUFRQyxHQUFHLENBQUNDLFlBQVk7QUFDakQsTUFBTUcsU0FBU1Asb0RBQVFBLENBQUNNO0FBQ2pCLE1BQU1FLEtBQUtULGdFQUFPQSxDQUFDUSxRQUFRO0lBQUVOLE1BQU1BLHlDQUFBQTtBQUFDLEdBQUciLCJzb3VyY2VzIjpbIi9ob21lL3J1bm5lci93b3Jrc3BhY2Uvc3JjL2xpYi9kYi50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBkcml6emxlIH0gZnJvbSBcImRyaXp6bGUtb3JtL3Bvc3RncmVzLWpzXCI7XG5pbXBvcnQgcG9zdGdyZXMgZnJvbSBcInBvc3RncmVzXCI7XG5pbXBvcnQgKiBhcyBzY2hlbWEgZnJvbSBcIi4uL2RiL3NjaGVtYVwiO1xuXG4vLyBWZXJpZmljYcOnw6NvIGRhcyB2YXJpw6F2ZWlzIGRlIGFtYmllbnRlXG5pZiAoIXByb2Nlc3MuZW52LkRBVEFCQVNFX1VSTCkge1xuICB0aHJvdyBuZXcgRXJyb3IoXCJEQVRBQkFTRV9VUkwgbsOjbyBlc3TDoSBkZWZpbmlkYVwiKTtcbn1cblxuLy8gQ29uZXjDo28gY29tIG8gYmFuY28gZGUgZGFkb3NcbmNvbnN0IGNvbm5lY3Rpb25TdHJpbmcgPSBwcm9jZXNzLmVudi5EQVRBQkFTRV9VUkw7XG5jb25zdCBjbGllbnQgPSBwb3N0Z3Jlcyhjb25uZWN0aW9uU3RyaW5nKTtcbmV4cG9ydCBjb25zdCBkYiA9IGRyaXp6bGUoY2xpZW50LCB7IHNjaGVtYSB9KTtcbiJdLCJuYW1lcyI6WyJkcml6emxlIiwicG9zdGdyZXMiLCJzY2hlbWEiLCJwcm9jZXNzIiwiZW52IiwiREFUQUJBU0VfVVJMIiwiRXJyb3IiLCJjb25uZWN0aW9uU3RyaW5nIiwiY2xpZW50IiwiZGIiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///(rsc)/./src/lib/db.ts\n");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   db: () => (/* binding */ db)\n/* harmony export */ });\n/* harmony import */ var _neondatabase_serverless__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @neondatabase/serverless */ \"(rsc)/./node_modules/@neondatabase/serverless/index.mjs\");\n/* harmony import */ var drizzle_orm_neon_serverless__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! drizzle-orm/neon-serverless */ \"(rsc)/./node_modules/drizzle-orm/neon-serverless/driver.js\");\n/* harmony import */ var ws__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ws */ \"(rsc)/./node_modules/ws/wrapper.mjs\");\n/* harmony import */ var _db_schema__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../db/schema */ \"(rsc)/./src/db/schema.ts\");\n\n\n\n\n// Configurar o WebSocket para o Neon Database\n_neondatabase_serverless__WEBPACK_IMPORTED_MODULE_0__.neonConfig.webSocketConstructor = ws__WEBPACK_IMPORTED_MODULE_1__[\"default\"];\n// Verificação das variáveis de ambiente\nif (!process.env.DATABASE_URL) {\n    throw new Error(\"DATABASE_URL não está definida\");\n}\n// Conexão com o banco de dados\nconst pool = new _neondatabase_serverless__WEBPACK_IMPORTED_MODULE_0__.Pool({\n    connectionString: process.env.DATABASE_URL\n});\nconst db = (0,drizzle_orm_neon_serverless__WEBPACK_IMPORTED_MODULE_3__.drizzle)(pool, {\n    schema: _db_schema__WEBPACK_IMPORTED_MODULE_2__\n});\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHJzYykvLi9zcmMvbGliL2RiLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7O0FBQTREO0FBQ047QUFDbEM7QUFDbUI7QUFFdkMsOENBQThDO0FBQzlDQyxnRUFBVUEsQ0FBQ0ksb0JBQW9CLEdBQUdGLDBDQUFFQTtBQUVwQyx3Q0FBd0M7QUFDeEMsSUFBSSxDQUFDRyxRQUFRQyxHQUFHLENBQUNDLFlBQVksRUFBRTtJQUM3QixNQUFNLElBQUlDLE1BQU07QUFDbEI7QUFFQSwrQkFBK0I7QUFDL0IsTUFBTUMsT0FBTyxJQUFJViwwREFBSUEsQ0FBQztJQUFFVyxrQkFBa0JMLFFBQVFDLEdBQUcsQ0FBQ0MsWUFBWTtBQUFDO0FBQzVELE1BQU1JLEtBQUtWLG9FQUFPQSxDQUFDUSxNQUFNO0lBQUVOLE1BQU1BLHlDQUFBQTtBQUFDLEdBQUciLCJzb3VyY2VzIjpbIi9ob21lL3J1bm5lci93b3Jrc3BhY2Uvc3JjL2xpYi9kYi50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBQb29sLCBuZW9uQ29uZmlnIH0gZnJvbSAnQG5lb25kYXRhYmFzZS9zZXJ2ZXJsZXNzJztcbmltcG9ydCB7IGRyaXp6bGUgfSBmcm9tICdkcml6emxlLW9ybS9uZW9uLXNlcnZlcmxlc3MnO1xuaW1wb3J0IHdzIGZyb20gXCJ3c1wiO1xuaW1wb3J0ICogYXMgc2NoZW1hIGZyb20gXCIuLi9kYi9zY2hlbWFcIjtcblxuLy8gQ29uZmlndXJhciBvIFdlYlNvY2tldCBwYXJhIG8gTmVvbiBEYXRhYmFzZVxubmVvbkNvbmZpZy53ZWJTb2NrZXRDb25zdHJ1Y3RvciA9IHdzO1xuXG4vLyBWZXJpZmljYcOnw6NvIGRhcyB2YXJpw6F2ZWlzIGRlIGFtYmllbnRlXG5pZiAoIXByb2Nlc3MuZW52LkRBVEFCQVNFX1VSTCkge1xuICB0aHJvdyBuZXcgRXJyb3IoXCJEQVRBQkFTRV9VUkwgbsOjbyBlc3TDoSBkZWZpbmlkYVwiKTtcbn1cblxuLy8gQ29uZXjDo28gY29tIG8gYmFuY28gZGUgZGFkb3NcbmNvbnN0IHBvb2wgPSBuZXcgUG9vbCh7IGNvbm5lY3Rpb25TdHJpbmc6IHByb2Nlc3MuZW52LkRBVEFCQVNFX1VSTCB9KTtcbmV4cG9ydCBjb25zdCBkYiA9IGRyaXp6bGUocG9vbCwgeyBzY2hlbWEgfSk7XG4iXSwibmFtZXMiOlsiUG9vbCIsIm5lb25Db25maWciLCJkcml6emxlIiwid3MiLCJzY2hlbWEiLCJ3ZWJTb2NrZXRDb25zdHJ1Y3RvciIsInByb2Nlc3MiLCJlbnYiLCJEQVRBQkFTRV9VUkwiLCJFcnJvciIsInBvb2wiLCJjb25uZWN0aW9uU3RyaW5nIiwiZGIiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///(rsc)/./src/lib/db.ts\n");
 
 /***/ }),
 
@@ -117,6 +117,26 @@ module.exports = require("next/dist/server/app-render/work-async-storage.externa
 
 "use strict";
 module.exports = require("next/dist/server/app-render/work-unit-async-storage.external.js");
+
+/***/ }),
+
+/***/ "?32c4":
+/*!****************************!*\
+  !*** bufferutil (ignored) ***!
+  \****************************/
+/***/ (() => {
+
+/* (ignored) */
+
+/***/ }),
+
+/***/ "?66e9":
+/*!********************************!*\
+  !*** utf-8-validate (ignored) ***!
+  \********************************/
+/***/ (() => {
+
+/* (ignored) */
 
 /***/ }),
 
@@ -175,17 +195,6 @@ module.exports = require("events");
 
 /***/ }),
 
-/***/ "fs":
-/*!*********************!*\
-  !*** external "fs" ***!
-  \*********************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("fs");
-
-/***/ }),
-
 /***/ "http":
 /*!***********************!*\
   !*** external "http" ***!
@@ -238,28 +247,6 @@ module.exports = require("next/dist/compiled/next-server/app-page.runtime.dev.js
 
 "use strict";
 module.exports = require("next/dist/compiled/next-server/app-route.runtime.dev.js");
-
-/***/ }),
-
-/***/ "os":
-/*!*********************!*\
-  !*** external "os" ***!
-  \*********************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("os");
-
-/***/ }),
-
-/***/ "perf_hooks":
-/*!*****************************!*\
-  !*** external "perf_hooks" ***!
-  \*****************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("perf_hooks");
 
 /***/ }),
 
@@ -336,7 +323,7 @@ module.exports = require("zlib");
 var __webpack_require__ = require("../../../../webpack-runtime.js");
 __webpack_require__.C(exports);
 var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-var __webpack_exports__ = __webpack_require__.X(0, ["vendor-chunks/next","vendor-chunks/drizzle-orm","vendor-chunks/jose","vendor-chunks/next-auth","vendor-chunks/openid-client","vendor-chunks/postgres","vendor-chunks/@babel","vendor-chunks/oauth","vendor-chunks/object-hash","vendor-chunks/preact","vendor-chunks/uuid","vendor-chunks/yallist","vendor-chunks/preact-render-to-string","vendor-chunks/lru-cache","vendor-chunks/cookie","vendor-chunks/oidc-token-hash","vendor-chunks/@panva"], () => (__webpack_exec__("(rsc)/./node_modules/next/dist/build/webpack/loaders/next-app-loader/index.js?name=app%2Fapi%2Fauth%2F%5B...nextauth%5D%2Froute&page=%2Fapi%2Fauth%2F%5B...nextauth%5D%2Froute&appPaths=&pagePath=private-next-app-dir%2Fapi%2Fauth%2F%5B...nextauth%5D%2Froute.ts&appDir=%2Fhome%2Frunner%2Fworkspace%2Fsrc%2Fapp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=%2Fhome%2Frunner%2Fworkspace&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=&preferredRegion=&middlewareConfig=e30%3D!")));
+var __webpack_exports__ = __webpack_require__.X(0, ["vendor-chunks/next","vendor-chunks/next-auth","vendor-chunks/@babel","vendor-chunks/drizzle-orm","vendor-chunks/jose","vendor-chunks/@neondatabase","vendor-chunks/ws","vendor-chunks/openid-client","vendor-chunks/oauth","vendor-chunks/object-hash","vendor-chunks/preact","vendor-chunks/uuid","vendor-chunks/yallist","vendor-chunks/preact-render-to-string","vendor-chunks/lru-cache","vendor-chunks/cookie","vendor-chunks/oidc-token-hash","vendor-chunks/@panva"], () => (__webpack_exec__("(rsc)/./node_modules/next/dist/build/webpack/loaders/next-app-loader/index.js?name=app%2Fapi%2Fauth%2F%5B...nextauth%5D%2Froute&page=%2Fapi%2Fauth%2F%5B...nextauth%5D%2Froute&appPaths=&pagePath=private-next-app-dir%2Fapi%2Fauth%2F%5B...nextauth%5D%2Froute.ts&appDir=%2Fhome%2Frunner%2Fworkspace%2Fsrc%2Fapp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=%2Fhome%2Frunner%2Fworkspace&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=&preferredRegion=&middlewareConfig=e30%3D!")));
 module.exports = __webpack_exports__;
 
 })();
