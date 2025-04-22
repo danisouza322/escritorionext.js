@@ -172,7 +172,7 @@ export const tarefas = pgTable("tarefas", {
   descricao: text("descricao"),
   tipo: tipoTarefaEnum("tipo").notNull(),
   status: statusTarefaEnum("status").default("pendente"),
-  responsavelId: integer("responsavel_id").references(() => usuarios.id),
+  responsavelId: integer("responsavel_id").references(() => usuarios.id), // Mantemos para compatibilidade
   criadorId: integer("criador_id").references(() => usuarios.id),
   dataVencimento: timestamp("data_vencimento"),
   dataConclusao: timestamp("data_conclusao"),
@@ -182,6 +182,14 @@ export const tarefas = pgTable("tarefas", {
   ativo: boolean("ativo").default(true),
   dataCriacao: timestamp("data_criacao").defaultNow(),
   dataAtualizacao: timestamp("data_atualizacao").defaultNow(),
+});
+
+// Relação entre Tarefas e Responsáveis (muitos para muitos)
+export const tarefasResponsaveis = pgTable("tarefas_responsaveis", {
+  id: serial("id").primaryKey(),
+  tarefaId: integer("tarefa_id").notNull().references(() => tarefas.id),
+  usuarioId: integer("usuario_id").notNull().references(() => usuarios.id),
+  dataCriacao: timestamp("data_criacao").defaultNow(),
 });
 
 // Observações de Tarefas
@@ -227,8 +235,21 @@ export const tarefasRelations = relations(tarefas, ({ one, many }) => ({
     fields: [tarefas.criadorId],
     references: [usuarios.id],
   }),
+  responsaveis: many(tarefasResponsaveis),
   observacoes: many(observacoesTarefas),
   arquivos: many(arquivosTarefas),
+}));
+
+// Relações da tabela de Tarefas e Responsáveis
+export const tarefasResponsaveisRelations = relations(tarefasResponsaveis, ({ one }) => ({
+  tarefa: one(tarefas, {
+    fields: [tarefasResponsaveis.tarefaId],
+    references: [tarefas.id],
+  }),
+  usuario: one(usuarios, {
+    fields: [tarefasResponsaveis.usuarioId],
+    references: [usuarios.id],
+  }),
 }));
 
 // Relações das Observações de Tarefas

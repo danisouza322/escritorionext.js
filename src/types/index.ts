@@ -79,6 +79,14 @@ export type Documento = {
   usuarioUpload?: Usuario | null;
 };
 
+export type TarefaResponsavel = {
+  id: number;
+  tarefaId: number;
+  usuarioId: number;
+  dataCriacao: Date;
+  usuario?: Usuario;
+};
+
 export type Tarefa = {
   id: number;
   contabilidadeId: number;
@@ -87,7 +95,7 @@ export type Tarefa = {
   descricao?: string | null;
   tipo: (typeof tipoTarefaEnum.enumValues)[number];
   status: (typeof statusTarefaEnum.enumValues)[number];
-  responsavelId?: number | null;
+  responsavelId?: number | null; // Campo mantido para compatibilidade
   criadorId?: number | null;
   dataVencimento?: Date | null;
   dataConclusao?: Date | null;
@@ -99,8 +107,9 @@ export type Tarefa = {
   dataAtualizacao: Date;
   contabilidade?: Contabilidade;
   cliente?: Cliente | null;
-  responsavel?: Usuario | null;
+  responsavel?: Usuario | null; // Campo mantido para compatibilidade
   criador?: Usuario | null;
+  responsaveis?: TarefaResponsavel[]; // Nova relação muitos-para-muitos
   observacoes?: ObservacaoTarefa[];
   arquivos?: ArquivoTarefa[];
 };

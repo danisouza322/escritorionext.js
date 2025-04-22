@@ -464,7 +464,7 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
           </CardHeader>
           
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Cliente</h3>
                 <div className="flex items-center gap-2 text-sm">
@@ -513,6 +513,23 @@ export default function TarefaDetalhes({ tarefa, colaboradores }: TarefaDetalhes
                 </div>
               </div>
             </div>
+            
+            {/* Seção de responsáveis adicionais */}
+            {tarefa.responsaveis && tarefa.responsaveis.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">Responsáveis Adicionais</h3>
+                <div className="flex flex-wrap gap-2">
+                  {tarefa.responsaveis.map((respItem) => (
+                    <Badge key={respItem.id} variant="outline" className="flex items-center gap-1 px-3 py-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback className="text-xs">{respItem.usuario?.nome?.charAt(0) || "U"}</AvatarFallback>
+                      </Avatar>
+                      <span className="ml-1">{respItem.usuario?.nome || "Usuário"}</span>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
             
             {tarefa.descricao && (
               <div>

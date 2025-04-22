@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { tarefas, observacoesTarefas } from "@/db/schema";
+import { tarefas, observacoesTarefas, tarefasResponsaveis } from "@/db/schema";
 import { eq, desc, and, gte, lte, or, exists, asc } from "drizzle-orm";
 import { z } from "zod";
 
@@ -12,7 +12,8 @@ const tarefaSchema = z.object({
   tipo: z.enum(["fiscal", "contabil", "departamento_pessoal", "administrativa", "outro"]),
   status: z.enum(["pendente", "em_andamento", "concluida", "atrasada", "cancelada"]).default("pendente"),
   clienteId: z.number().optional().nullable(),
-  responsavelId: z.number().optional().nullable(),
+  responsavelId: z.number().optional().nullable(), // Mantido para compatibilidade
+  responsaveis: z.array(z.number()).optional().default([]), // Novo campo para múltiplos responsáveis
   descricao: z.string().optional().nullable(),
   dataVencimento: z.string().optional().nullable(),
   prioridade: z.number().default(0),
@@ -42,14 +43,28 @@ export async function GET(request: Request) {
     // Construir condições de consulta
     let conditions = [eq(tarefas.contabilidadeId, contabilidadeId)];
     
-    // Filtrar apenas tarefas onde o usuário é responsável OU é o criador
+    // Filtrar apenas tarefas onde o usuário é responsável principal OU está na lista de responsáveis adicionais OU é o criador
     // A não ser que a query 'todos' seja passada como true
     if (!todos) {
-      const orConditions = [eq(tarefas.responsavelId, usuarioId)];
-      
-      // Adiciona a condição de criadorId apenas se a coluna existir
-      // isso garante que a consulta funcione mesmo para tarefas antigas
-      orConditions.push(eq(tarefas.criadorId, usuarioId));
+      const orConditions = [
+        // Condição 1: Usuário é o responsável principal
+        eq(tarefas.responsavelId, usuarioId),
+        
+        // Condição 2: Usuário é o criador
+        eq(tarefas.criadorId, usuarioId),
+        
+        // Condição 3: Usuário está na lista de responsáveis adicionais
+        exists(
+          db.select()
+            .from(tarefasResponsaveis)
+            .where(
+              and(
+                eq(tarefasResponsaveis.tarefaId, tarefas.id),
+                eq(tarefasResponsaveis.usuarioId, usuarioId)
+              )
+            )
+        )
+      ];
       
       conditions.push(or(...orConditions));
     }
@@ -75,6 +90,11 @@ export async function GET(request: Request) {
         cliente: true,
         responsavel: true,
         criador: true,
+        responsaveis: {
+          with: {
+            usuario: true,
+          }
+        },
       },
     });
 
@@ -123,13 +143,41 @@ export async function POST(request: Request) {
         : null,
     };
 
+    // Extrai lista de responsáveis para inserir na tabela de relacionamento
+    const responsaveis = validacao.data.responsaveis || [];
+
     // Cria a nova tarefa
     const novaTarefa = await db
       .insert(tarefas)
       .values(dadosTarefa)
       .returning();
 
-    return NextResponse.json(novaTarefa[0], { status: 201 });
+    const tarefaCriada = novaTarefa[0];
+
+    // Se há responsáveis adicionais, insere na tabela de relacionamento
+    if (responsaveis.length > 0) {
+      const responsaveisValues = responsaveis.map(usuarioId => ({
+        tarefaId: tarefaCriada.id,
+        usuarioId: usuarioId,
+      }));
+
+      await db
+        .insert(tarefasResponsaveis)
+        .values(responsaveisValues);
+    }
+
+    // Se o próprio responsável principal (responsavelId) não está nos responsáveis múltiplos,
+    // adiciona ele também na tabela de relacionamento para coerência de dados
+    if (tarefaCriada.responsavelId && !responsaveis.includes(tarefaCriada.responsavelId)) {
+      await db
+        .insert(tarefasResponsaveis)
+        .values({
+          tarefaId: tarefaCriada.id,
+          usuarioId: tarefaCriada.responsavelId,
+        });
+    }
+
+    return NextResponse.json(tarefaCriada, { status: 201 });
   } catch (error) {
     console.error("Erro ao criar tarefa:", error);
     return NextResponse.json(

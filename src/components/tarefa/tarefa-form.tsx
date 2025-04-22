@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -36,6 +36,8 @@ import {
 } from "@/components/ui/select";
 import { Cliente, Usuario } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Upload, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Esquema de validação da tarefa
 const tarefaSchema = z.object({
@@ -43,11 +45,13 @@ const tarefaSchema = z.object({
   tipo: z.enum(["fiscal", "contabil", "departamento_pessoal", "administrativa", "outro"]),
   status: z.enum(["pendente", "em_andamento", "concluida", "atrasada", "cancelada"]).default("pendente"),
   clienteId: z.string().optional(),
-  responsavelId: z.string().optional(),
+  responsavelId: z.string().optional(), // Mantido para compatibilidade
+  responsaveis: z.array(z.string()).default([]), // Múltiplos responsáveis
   descricao: z.string().optional(),
   dataVencimento: z.string().optional(),
   prioridade: z.coerce.number().default(0),
   recorrente: z.boolean().default(false),
+  // O arquivo não precisa ser incluído no schema já que será enviado separadamente
 });
 
 type TarefaFormValues = z.infer<typeof tarefaSchema>;
@@ -95,6 +99,10 @@ export default function TarefaForm({
     }
   };
 
+  // Estado para o arquivo selecionado
+  const [arquivo, setArquivo] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Configurar formulário
   const form = useForm<TarefaFormValues>({
     resolver: zodResolver(tarefaSchema),
@@ -104,6 +112,7 @@ export default function TarefaForm({
       status: "pendente",
       clienteId: clienteId ? String(clienteId) : undefined,
       responsavelId: undefined,
+      responsaveis: [],
       descricao: "",
       dataVencimento: "",
       prioridade: 0,
@@ -121,6 +130,8 @@ export default function TarefaForm({
         // Converter "0" para null onde apropriado e string para number onde necessário
         clienteId: data.clienteId === "0" ? null : data.clienteId ? Number(data.clienteId) : null,
         responsavelId: data.responsavelId === "0" ? null : data.responsavelId ? Number(data.responsavelId) : null,
+        // Converter os IDs dos responsáveis para números
+        responsaveis: data.responsaveis.map(id => Number(id)),
       };
       
       // Enviar para a API
@@ -136,9 +147,27 @@ export default function TarefaForm({
         throw new Error("Erro ao criar tarefa");
       }
 
+      const tarefaCriada = await response.json();
+      
+      // Se houver um arquivo para upload, enviar após criar a tarefa
+      if (arquivo) {
+        const formData = new FormData();
+        formData.append("arquivo", arquivo);
+        
+        const uploadResponse = await fetch(`/api/tarefas/${tarefaCriada.id}/arquivos`, {
+          method: "POST",
+          body: formData,
+        });
+        
+        if (!uploadResponse.ok) {
+          console.error("Erro ao fazer upload do arquivo");
+          // Ainda assim continuamos, pois a tarefa já foi criada
+        }
+      }
+
       toast({
         title: "Tarefa criada",
-        description: "A tarefa foi criada com sucesso",
+        description: "A tarefa foi criada com sucesso" + (arquivo ? ", incluindo o arquivo anexado" : ""),
       });
 
       // Fechar modal e atualizar dados
@@ -171,11 +200,14 @@ export default function TarefaForm({
             status: "pendente",
             clienteId: clienteId ? String(clienteId) : undefined,
             responsavelId: undefined,
+            responsaveis: [],
             descricao: "",
             dataVencimento: "",
             prioridade: 0,
             recorrente: false,
           });
+          // Resetar o arquivo
+          setArquivo(null);
         }
       }}
     >
@@ -308,14 +340,14 @@ export default function TarefaForm({
                 name="responsavelId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Responsável</FormLabel>
+                    <FormLabel>Responsável Principal</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione o responsável (opcional)" />
+                          <SelectValue placeholder="Selecione o responsável principal (opcional)" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -327,6 +359,71 @@ export default function TarefaForm({
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="responsaveis"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Responsáveis Adicionais</FormLabel>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2">
+                        {field.value.map((userId, index) => {
+                          const colaborador = colaboradores.find(col => col.id === Number(userId));
+                          return colaborador ? (
+                            <Badge 
+                              key={userId} 
+                              className="px-3 py-1"
+                              variant="secondary"
+                            >
+                              {colaborador.nome}
+                              <button
+                                type="button"
+                                className="ml-2 text-muted-foreground"
+                                onClick={() => {
+                                  const newResponsaveis = [...field.value];
+                                  newResponsaveis.splice(index, 1);
+                                  field.onChange(newResponsaveis);
+                                }}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                      <Select
+                        onValueChange={(value) => {
+                          if (value === "0") return;
+                          if (!field.value.includes(value)) {
+                            field.onChange([...field.value, value]);
+                          }
+                        }}
+                        value=""
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Adicionar responsável" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {colaboradores
+                            .filter(col => !field.value.includes(String(col.id)))
+                            .map((colaborador) => (
+                              <SelectItem key={colaborador.id} value={String(colaborador.id)}>
+                                {colaborador.nome}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <FormDescription>
+                      Você pode adicionar múltiplos responsáveis para esta tarefa
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -413,6 +510,54 @@ export default function TarefaForm({
                 </FormItem>
               )}
             />
+            
+            {/* Componente de upload de arquivo */}
+            <div className="space-y-2">
+              <FormLabel>Anexar Arquivo (opcional)</FormLabel>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-4 w-4" />
+                  Selecionar Arquivo
+                </Button>
+                {arquivo && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="px-3 py-1">
+                      {arquivo.name}
+                      <button
+                        type="button"
+                        className="ml-2 text-muted-foreground"
+                        onClick={() => setArquivo(null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {(arquivo.size / 1024 / 1024).toFixed(2)} MB
+                    </span>
+                  </div>
+                )}
+              </div>
+              <FormDescription>
+                Você pode anexar um arquivo à tarefa. Formatos suportados: PDF, Word, Excel, imagens
+              </FormDescription>
+              
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files && files.length > 0) {
+                    setArquivo(files[0]);
+                  }
+                }}
+              />
+            </div>
             
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
