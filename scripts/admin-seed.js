@@ -1,6 +1,4 @@
 const { Pool } = require('pg');
-const { drizzle } = require('drizzle-orm/pg-pool');
-const { eq } = require('drizzle-orm');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 
@@ -14,15 +12,10 @@ if (!process.env.DATABASE_URL) {
 }
 
 async function main() {
+  // Conexão com o banco de dados
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  
   try {
-    // Conexão com o banco de dados
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    
-    // Importar manualmente as definições do schema
-    // No ambiente Node.js comum temos problemas para importar módulos ES
-    // então vamos definir as tabelas diretamente
-    const { sql } = require('drizzle-orm');
-
     // Verificar se as tabelas existem
     const checkTablesResult = await pool.query(`
       SELECT EXISTS (
@@ -35,20 +28,17 @@ async function main() {
       console.error('As tabelas não foram criadas corretamente. Execute a migração primeiro.');
       process.exit(1);
     }
-
-    // Usar SQL direto para as consultas
-    const db = drizzle(pool);
     
-    console.log('Verificando as tabelas existentes...');
+    console.log('Verificando as contabilidades existentes...');
     
-    // Verificar contabilidades existentes usando SQL direto
+    // Verificar contabilidades existentes
     const contabilidadesResult = await pool.query('SELECT * FROM contabilidades');
     const contabilidades = contabilidadesResult.rows;
     
     if (contabilidades.length === 0) {
       console.log('Nenhuma contabilidade encontrada, inserindo a primeira...');
       
-      // Inserir contabilidade base usando SQL
+      // Inserir contabilidade base
       const contabilidadeResult = await pool.query(`
         INSERT INTO contabilidades (nome, cnpj, email, telefone, plano, ativo, data_criacao, data_atualizacao)
         VALUES ('Contabilidade Exemplo', '12.345.678/0001-99', 'contato@contabilidade.com', '(11) 99999-9999', 'premium', true, NOW(), NOW())
@@ -58,33 +48,45 @@ async function main() {
       const contabilidade = contabilidadeResult.rows[0];
       console.log(`Contabilidade criada com ID: ${contabilidade.id}`);
       
-      // Gerar senha criptografada
-      const salt = await bcrypt.genSalt(10);
-      const senhaHash = await bcrypt.hash('123456', salt);
-      
-      // Inserir usuário administrador usando SQL
-      const adminResult = await pool.query(`
-        INSERT INTO usuarios (contabilidade_id, nome, email, senha, tipo, ativo, data_criacao, data_atualizacao)
-        VALUES ($1, 'Administrador', 'admin@contabilidade.com', $2, 'admin', true, NOW(), NOW())
-        RETURNING *
-      `, [contabilidade.id, senhaHash]);
-      
-      const admin = adminResult.rows[0];
-      console.log(`Usuário administrador criado com ID: ${admin.id}`);
-    } else {
-      console.log(`${contabilidades.length} contabilidades encontradas no banco de dados.`);
-      
       // Verificar usuários existentes
-      const usuariosResult = await pool.query('SELECT * FROM usuarios');
-      console.log(`${usuariosResult.rows.length} usuários encontrados no banco de dados.`);
+      const usuariosResult = await pool.query('SELECT * FROM usuarios WHERE contabilidade_id = $1', [contabilidade.id]);
+      
+      if (usuariosResult.rows.length === 0) {
+        // Gerar senha criptografada
+        const salt = await bcrypt.genSalt(10);
+        const senhaHash = await bcrypt.hash('123456', salt);
+        
+        // Inserir usuário administrador
+        const adminResult = await pool.query(`
+          INSERT INTO usuarios (contabilidade_id, nome, email, senha, tipo, ativo, data_criacao, data_atualizacao)
+          VALUES ($1, 'Administrador', 'admin@contabilidade.com', $2, 'admin', true, NOW(), NOW())
+          RETURNING *
+        `, [contabilidade.id, senhaHash]);
+        
+        const admin = adminResult.rows[0];
+        console.log(`Usuário administrador criado com ID: ${admin.id}`);
+        console.log(`Login: admin@contabilidade.com / Senha: 123456`);
+      } else {
+        console.log(`${usuariosResult.rows.length} usuários já existem para esta contabilidade.`);
+      }
+    } else {
+      console.log(`${contabilidades.length} contabilidades encontradas no banco de dados:`);
+      
+      for (const contabilidade of contabilidades) {
+        console.log(`- ID ${contabilidade.id}: ${contabilidade.nome} (${contabilidade.cnpj})`);
+        
+        // Verificar usuários existentes para esta contabilidade
+        const usuariosResult = await pool.query('SELECT * FROM usuarios WHERE contabilidade_id = $1', [contabilidade.id]);
+        console.log(`  ${usuariosResult.rows.length} usuários associados.`);
+      }
     }
-    
-    // Fechar conexão com o banco de dados
-    await pool.end();
     
     console.log('Verificação concluída com sucesso!');
   } catch (error) {
     console.error('Erro durante a verificação do banco de dados:', error);
+  } finally {
+    // Fechar conexão com o banco de dados
+    await pool.end();
   }
 }
 
