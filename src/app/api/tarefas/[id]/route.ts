@@ -25,12 +25,15 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
+    // Extrair o ID de params de forma segura (assíncrona)
+    const { id } = await Promise.resolve(context.params);
+    const tarefaId = Number(id);
+    
     const session = await getServerSession(authOptions);
     if (!session) {
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
 
     const [tarefa] = await db.query.tarefas.findMany({
@@ -61,12 +64,15 @@ export async function PATCH(
   context: { params: { id: string } }
 ) {
   try {
+    // Extrair o ID de params de forma segura (assíncrona)
+    const { id } = await Promise.resolve(context.params);
+    const tarefaId = Number(id);
+    
     const session = await getServerSession(authOptions);
     if (!session) {
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
 
     // Verificar se a tarefa existe e pertence à contabilidade do usuário
@@ -134,12 +140,15 @@ export async function PUT(
   context: { params: { id: string } }
 ) {
   try {
+    // Extrair o ID de params de forma segura (assíncrona)
+    const { id } = await Promise.resolve(context.params);
+    const tarefaId = Number(id);
+    
     const session = await getServerSession(authOptions);
     if (!session) {
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
 
     // Verificar se a tarefa existe e pertence à contabilidade do usuário

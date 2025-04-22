@@ -173,6 +173,7 @@ export const tarefas = pgTable("tarefas", {
   tipo: tipoTarefaEnum("tipo").notNull(),
   status: statusTarefaEnum("status").default("pendente"),
   responsavelId: integer("responsavel_id").references(() => usuarios.id),
+  criadorId: integer("criador_id").references(() => usuarios.id),
   dataVencimento: timestamp("data_vencimento"),
   dataConclusao: timestamp("data_conclusao"),
   prioridade: integer("prioridade").default(0),
@@ -220,6 +221,10 @@ export const tarefasRelations = relations(tarefas, ({ one, many }) => ({
   }),
   responsavel: one(usuarios, {
     fields: [tarefas.responsavelId],
+    references: [usuarios.id],
+  }),
+  criador: one(usuarios, {
+    fields: [tarefas.criadorId],
     references: [usuarios.id],
   }),
   observacoes: many(observacoesTarefas),

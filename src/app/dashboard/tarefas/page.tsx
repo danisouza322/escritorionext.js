@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { tarefas, usuarios, clientes } from "@/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, or } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
 import TarefaList from "@/components/tarefa/tarefa-list";
 import TarefaForm from "@/components/tarefa/tarefa-form";
@@ -19,16 +19,20 @@ export default async function TarefasPage() {
   const contabilidadeId = Number(session.user.contabilidadeId);
   const usuarioId = Number(session.user.id);
   
-  // Buscar tarefas onde o usuário é responsável
+  // Buscar tarefas onde o usuário é responsável OU é o criador
   const tarefasList = await db.query.tarefas.findMany({
     where: and(
       eq(tarefas.contabilidadeId, contabilidadeId),
-      eq(tarefas.responsavelId, usuarioId)
+      or(
+        eq(tarefas.responsavelId, usuarioId),
+        eq(tarefas.criadorId, usuarioId)
+      )
     ),
     orderBy: [desc(tarefas.dataCriacao)],
     with: {
       cliente: true,
       responsavel: true,
+      criador: true,
     },
   });
   
@@ -47,7 +51,9 @@ export default async function TarefasPage() {
   
   // Contagem por status
   const statusTarefas = tarefasList.reduce((acc, tarefa) => {
-    acc[tarefa.status] = (acc[tarefa.status] || 0) + 1;
+    // Garantir que status nunca seja null ao acessar
+    const status = tarefa.status || 'pendente';
+    acc[status] = (acc[status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -61,8 +67,8 @@ export default async function TarefasPage() {
           </span>
         </div>
         <TarefaForm 
-          clientes={clientesList} 
-          colaboradores={colaboradores}
+          clientes={clientesList as any} 
+          colaboradores={colaboradores as any}
         >
           <Button className="gap-2">
             <ListTodo className="h-4 w-4" />
@@ -94,7 +100,7 @@ export default async function TarefasPage() {
         </div>
       </div>
       
-      <TarefaList tarefas={tarefasList} />
+      <TarefaList tarefas={tarefasList as any} />
     </div>
   );
 }

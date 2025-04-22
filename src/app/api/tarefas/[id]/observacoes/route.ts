@@ -16,6 +16,10 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   try {
+    // Extrair o ID de params de forma segura (assíncrona)
+    const { id } = await Promise.resolve(context.params);
+    const tarefaId = Number(id);
+    
     const session = await getServerSession(authOptions);
     if (!session) {
       return new NextResponse("Não autorizado", { status: 401 });
@@ -29,7 +33,6 @@ export async function DELETE(
       return new NextResponse("ID da observação não fornecido", { status: 400 });
     }
 
-    const tarefaId = parseInt(context.params.id as string, 10);
     const contabilidadeId = Number(session.user.contabilidadeId);
     const usuarioId = Number(session.user.id);
 
@@ -89,12 +92,15 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
+    // Extrair o ID de params de forma segura (assíncrona)
+    const { id } = await Promise.resolve(context.params);
+    const tarefaId = Number(id);
+    
     const session = await getServerSession(authOptions);
     if (!session) {
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
 
     // Verificar se a tarefa pertence à contabilidade do usuário
@@ -136,12 +142,15 @@ export async function POST(
   context: { params: { id: string } }
 ) {
   try {
+    // Extrair o ID de params de forma segura (assíncrona)
+    const { id } = await Promise.resolve(context.params);
+    const tarefaId = Number(id);
+    
     const session = await getServerSession(authOptions);
     if (!session) {
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const tarefaId = Number(context.params.id);
     const contabilidadeId = Number(session.user.contabilidadeId);
     const usuarioId = Number(session.user.id);
 

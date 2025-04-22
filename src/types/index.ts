@@ -88,6 +88,7 @@ export type Tarefa = {
   tipo: (typeof tipoTarefaEnum.enumValues)[number];
   status: (typeof statusTarefaEnum.enumValues)[number];
   responsavelId?: number | null;
+  criadorId?: number | null;
   dataVencimento?: Date | null;
   dataConclusao?: Date | null;
   prioridade: number;
@@ -99,6 +100,7 @@ export type Tarefa = {
   contabilidade?: Contabilidade;
   cliente?: Cliente | null;
   responsavel?: Usuario | null;
+  criador?: Usuario | null;
   observacoes?: ObservacaoTarefa[];
   arquivos?: ArquivoTarefa[];
 };

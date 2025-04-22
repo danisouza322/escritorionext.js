@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { tarefas } from "@/db/schema";
-import { eq, desc, and, gte, lte, or } from "drizzle-orm";
+import { tarefas, observacoesTarefas } from "@/db/schema";
+import { eq, desc, and, gte, lte, or, exists, asc } from "drizzle-orm";
 import { z } from "zod";
 
 // Validação dos dados de tarefa
@@ -42,10 +42,16 @@ export async function GET(request: Request) {
     // Construir condições de consulta
     let conditions = [eq(tarefas.contabilidadeId, contabilidadeId)];
     
-    // Filtrar apenas tarefas onde o usuário é responsável
+    // Filtrar apenas tarefas onde o usuário é responsável OU é o criador
     // A não ser que a query 'todos' seja passada como true
     if (!todos) {
-      conditions.push(eq(tarefas.responsavelId, usuarioId));
+      const orConditions = [eq(tarefas.responsavelId, usuarioId)];
+      
+      // Adiciona a condição de criadorId apenas se a coluna existir
+      // isso garante que a consulta funcione mesmo para tarefas antigas
+      orConditions.push(eq(tarefas.criadorId, usuarioId));
+      
+      conditions.push(or(...orConditions));
     }
     
     if (clienteId) {
@@ -68,6 +74,7 @@ export async function GET(request: Request) {
       with: {
         cliente: true,
         responsavel: true,
+        criador: true,
       },
     });
 
@@ -109,6 +116,8 @@ export async function POST(request: Request) {
       contabilidadeId,
       // Se não for especificado um responsável, define o usuário atual como responsável
       responsavelId: validacao.data.responsavelId || usuarioId,
+      // Sempre define o usuário atual como criador
+      criadorId: usuarioId,
       dataVencimento: validacao.data.dataVencimento
         ? new Date(validacao.data.dataVencimento)
         : null,

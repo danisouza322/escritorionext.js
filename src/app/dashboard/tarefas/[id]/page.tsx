@@ -26,8 +26,10 @@ export default async function TarefaPage(props: PageProps) {
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
-  // Usar o id de props de uma forma segura, evitando usar o params de forma síncrona
-  const tarefaId = parseInt(props.params.id as string, 10); // parsing com parseInt é mais seguro
+  
+  // Extrair o ID de params de forma assíncrona
+  const { id } = await Promise.resolve(props.params);
+  const tarefaId = parseInt(id, 10); // parsing com parseInt é mais seguro
 
   // Buscar tarefa no banco de dados
   const [tarefa] = await db.query.tarefas.findMany({
