@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/providers";
 import { Toaster } from "@/components/ui/toaster";
+import LoadingProgress from "@/components/loading-progress";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
+          <LoadingProgress />
           {children}
           <Toaster />
         </Providers>
