@@ -1,0 +1,66 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { clientes } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { Button } from "@/components/ui/button";
+import ClienteList from "@/components/cliente/cliente-list";
+import { UserPlus } from "lucide-react";
+import Link from "next/link";
+
+export default async function ClientesPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/auth");
+  }
+
+  const contabilidadeId = Number(session.user.contabilidadeId);
+  
+  // Buscar clientes
+  const clientesList = await db.query.clientes.findMany({
+    where: eq(clientes.contabilidadeId, contabilidadeId),
+    orderBy: [desc(clientes.dataCriacao)],
+  });
+  
+  // Contagem por tipo
+  const pessoasFisicas = clientesList.filter(c => c.tipo === "pessoa_fisica").length;
+  const pessoasJuridicas = clientesList.filter(c => c.tipo === "pessoa_juridica").length;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Clientes</h1>
+          <p className="text-muted-foreground">
+            Gerencie seus clientes e seus dados
+          </p>
+        </div>
+        <Link href="/dashboard/clientes/cadastrar">
+          <Button className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            Novo Cliente
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-card border rounded-lg p-4 text-center">
+          <p className="text-muted-foreground text-sm">Total de Clientes</p>
+          <p className="text-3xl font-bold">{clientesList.length}</p>
+        </div>
+        <div className="bg-card border rounded-lg p-4 text-center">
+          <p className="text-muted-foreground text-sm">Pessoas Físicas</p>
+          <p className="text-3xl font-bold">{pessoasFisicas}</p>
+        </div>
+        <div className="bg-card border rounded-lg p-4 text-center">
+          <p className="text-muted-foreground text-sm">Pessoas Jurídicas</p>
+          <p className="text-3xl font-bold">{pessoasJuridicas}</p>
+        </div>
+      </div>
+      
+      <ClienteList clientes={clientesList} />
+    </div>
+  );
+}
