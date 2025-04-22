@@ -46,6 +46,10 @@ const clienteSchema = z.object({
   cidade: z.string().optional().or(z.literal("")),
   estado: z.string().optional().or(z.literal("")),
   cep: z.string().optional().or(z.literal("")),
+  data_abertura: z.string().optional().or(z.literal("")),
+  natureza_juridica: z.string().optional().or(z.literal("")),
+  atividade_principal: z.string().optional().or(z.literal("")),
+  simples_nacional: z.enum(["sim", "nao"]).optional().or(z.literal("")),
   observacoes: z.string().optional().or(z.literal("")),
 });
 
@@ -73,6 +77,10 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
         cidade: cliente.cidade || "",
         estado: cliente.estado || "",
         cep: cliente.cep || "",
+        data_abertura: cliente.data_abertura || "",
+        natureza_juridica: cliente.natureza_juridica || "",
+        atividade_principal: cliente.atividade_principal || "",
+        simples_nacional: cliente.simples_nacional || "nao",
         observacoes: cliente.observacoes || "",
       }
     : {
@@ -85,6 +93,10 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
         cidade: "",
         estado: "",
         cep: "",
+        data_abertura: "",
+        natureza_juridica: "",
+        atividade_principal: "",
+        simples_nacional: "nao",
         observacoes: "",
       };
 
@@ -124,6 +136,10 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
       form.setValue("cidade", data.cidade || "");
       form.setValue("estado", data.estado || "");
       form.setValue("cep", data.cep || "");
+      form.setValue("data_abertura", data.data_abertura || "");
+      form.setValue("natureza_juridica", data.natureza_juridica || "");
+      form.setValue("atividade_principal", data.atividade_principal || "");
+      form.setValue("simples_nacional", data.simples_nacional || "nao");
       
       toast({
         title: "CNPJ Consultado",
@@ -241,20 +257,6 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
               
               <FormField
                 control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder={form.watch("tipo") === "pessoa_fisica" ? "Nome completo" : "Razão Social"} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
                 name="documento"
                 render={({ field }) => (
                   <FormItem>
@@ -288,6 +290,20 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
               
               <FormField
                 control={form.control}
+                name="nome"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <Input placeholder={form.watch("tipo") === "pessoa_fisica" ? "Nome completo" : "Razão Social"} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
@@ -313,6 +329,77 @@ export default function ClienteForm({ children, cliente }: ClienteFormProps) {
                   </FormItem>
                 )}
               />
+              
+              {form.watch("tipo") === "pessoa_juridica" && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="data_abertura"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Data de Abertura</FormLabel>
+                        <FormControl>
+                          <Input placeholder="01/01/2000" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                
+                  <FormField
+                    control={form.control}
+                    name="natureza_juridica"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Natureza Jurídica</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: Sociedade Empresária Limitada" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="atividade_principal"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Atividade Principal</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: Comércio varejista de..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="simples_nacional"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Optante pelo Simples Nacional</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="sim">Sim</SelectItem>
+                            <SelectItem value="nao">Não</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
               
               <FormField
                 control={form.control}

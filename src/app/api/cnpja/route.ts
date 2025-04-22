@@ -66,7 +66,7 @@ export async function GET(request: Request) {
     const formattedData = {
       nome: data.company?.name || '',
       documento: documento,
-      tipo: 'juridica',
+      tipo: 'pessoa_juridica',
       email: data.emails?.[0]?.address || '',
       telefone: data.phones?.[0] ? `${data.phones[0].area}${data.phones[0].number}` : '',
       endereco: data.address?.street ? `${data.address.street}, ${data.address.number}` : '',
@@ -76,9 +76,13 @@ export async function GET(request: Request) {
       estado: data.address?.state || '',
       cep: data.address?.zip || '',
       status: data.status?.text || '',
-      abertura: data.founded || '',
+      data_abertura: data.founded || '',
+      natureza_juridica: data.legalNature?.text || '',
       atividade_principal: data.mainActivity?.text || '',
       atividades_secundarias: data.sideActivities?.map((activity: any) => activity.text).join(', ') || '',
+      simples_nacional: data.simples?.simples === true ? 'sim' : 'nao',
+      mei: data.simples?.mei === true ? 'sim' : 'nao',
+      capital_social: data.capital || '',
       raw: data // Inclui todos os dados brutos para uso avançado, se necessário
     };
     
