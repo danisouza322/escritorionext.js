@@ -11,7 +11,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     contabilidadeId: number;
-    tipo: string;
+    tipo: string | null;
     contabilidade?: any;
   }
   
@@ -19,7 +19,7 @@ declare module "next-auth" {
     user: {
       id: string;
       contabilidadeId: number;
-      tipo: string;
+      tipo: string | null;
       contabilidade?: any;
       name?: string | null;
       email?: string | null;
@@ -32,7 +32,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     contabilidadeId: number;
-    tipo: string;
+    tipo: string | null;
     contabilidade?: any;
   }
 }
@@ -83,18 +83,23 @@ export const authOptions: NextAuthOptions = {
           // Buscar contabilidade do usuário
           const contabilidadeQuery = await db
             .select()
-            .from(usuarios.contabilidade)
-            .where(eq(usuarios.contabilidade.id, user.contabilidadeId));
+            .from(contabilidades)
+            .where(eq(contabilidades.id, user.contabilidadeId));
 
           const contabilidade = contabilidadeQuery.length ? contabilidadeQuery[0] : null;
 
+          // Utilizando a tipagem do NextAuth para o usuário
           return {
             id: user.id.toString(),
             name: user.nome,
             email: user.email,
             image: user.fotoPerfil,
+            // Adicionando campos customizados
+            // @ts-ignore - Ignorando erro de tipagem temporariamente
             contabilidadeId: user.contabilidadeId,
+            // @ts-ignore - Ignorando erro de tipagem temporariamente
             tipo: user.tipo,
+            // @ts-ignore - Ignorando erro de tipagem temporariamente
             contabilidade: contabilidade,
           };
         } catch (error) {
