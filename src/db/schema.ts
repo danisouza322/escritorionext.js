@@ -183,8 +183,33 @@ export const tarefas = pgTable("tarefas", {
   dataAtualizacao: timestamp("data_atualizacao").defaultNow(),
 });
 
+// Observações de Tarefas
+export const observacoesTarefas = pgTable("observacoes_tarefas", {
+  id: serial("id").primaryKey(),
+  tarefaId: integer("tarefa_id").notNull().references(() => tarefas.id),
+  usuarioId: integer("usuario_id").notNull().references(() => usuarios.id),
+  texto: text("texto").notNull(),
+  ativo: boolean("ativo").default(true),
+  dataCriacao: timestamp("data_criacao").defaultNow(),
+  dataAtualizacao: timestamp("data_atualizacao").defaultNow(),
+});
+
+// Arquivos de Tarefas
+export const arquivosTarefas = pgTable("arquivos_tarefas", {
+  id: serial("id").primaryKey(),
+  tarefaId: integer("tarefa_id").notNull().references(() => tarefas.id),
+  usuarioId: integer("usuario_id").notNull().references(() => usuarios.id),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  tipo: varchar("tipo", { length: 100 }),
+  tamanho: integer("tamanho"),
+  caminho: text("caminho").notNull(),
+  ativo: boolean("ativo").default(true),
+  dataCriacao: timestamp("data_criacao").defaultNow(),
+  dataAtualizacao: timestamp("data_atualizacao").defaultNow(),
+});
+
 // Relações das Tarefas
-export const tarefasRelations = relations(tarefas, ({ one }) => ({
+export const tarefasRelations = relations(tarefas, ({ one, many }) => ({
   contabilidade: one(contabilidades, {
     fields: [tarefas.contabilidadeId],
     references: [contabilidades.id],
@@ -195,6 +220,32 @@ export const tarefasRelations = relations(tarefas, ({ one }) => ({
   }),
   responsavel: one(usuarios, {
     fields: [tarefas.responsavelId],
+    references: [usuarios.id],
+  }),
+  observacoes: many(observacoesTarefas),
+  arquivos: many(arquivosTarefas),
+}));
+
+// Relações das Observações de Tarefas
+export const observacoesTarefasRelations = relations(observacoesTarefas, ({ one }) => ({
+  tarefa: one(tarefas, {
+    fields: [observacoesTarefas.tarefaId],
+    references: [tarefas.id],
+  }),
+  usuario: one(usuarios, {
+    fields: [observacoesTarefas.usuarioId],
+    references: [usuarios.id],
+  }),
+}));
+
+// Relações dos Arquivos de Tarefas
+export const arquivosTarefasRelations = relations(arquivosTarefas, ({ one }) => ({
+  tarefa: one(tarefas, {
+    fields: [arquivosTarefas.tarefaId],
+    references: [tarefas.id],
+  }),
+  usuario: one(usuarios, {
+    fields: [arquivosTarefas.usuarioId],
     references: [usuarios.id],
   }),
 }));

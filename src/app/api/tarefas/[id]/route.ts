@@ -1,31 +1,38 @@
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { tarefas } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
-// GET - Obter detalhes de uma tarefa específica
+const tarefaStatusSchema = z.object({
+  status: z.enum(["pendente", "em_andamento", "concluida", "atrasada", "cancelada"]),
+});
+
+const tarefaUpdateSchema = z.object({
+  responsavelId: z.string().nullable().optional(),
+  clienteId: z.string().nullable().optional(),
+  titulo: z.string().min(3).optional(),
+  descricao: z.string().nullable().optional(),
+  dataVencimento: z.string().nullable().optional(),
+  prioridade: z.number().min(1).max(3).optional(),
+});
+
+// GET para obter uma tarefa específica
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verificar autenticação
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const contabilidadeId = Number(session.user.contabilidadeId);
     const tarefaId = Number(params.id);
+    const contabilidadeId = Number(session.user.contabilidadeId);
 
-    if (isNaN(tarefaId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
-    
-    // Buscar tarefa no banco de dados
     const [tarefa] = await db.query.tarefas.findMany({
       where: and(
         eq(tarefas.id, tarefaId),
@@ -38,46 +45,33 @@ export async function GET(
     });
 
     if (!tarefa) {
-      return NextResponse.json({ error: "Tarefa não encontrada" }, { status: 404 });
+      return new NextResponse("Tarefa não encontrada", { status: 404 });
     }
 
     return NextResponse.json(tarefa);
   } catch (error) {
     console.error("Erro ao buscar tarefa:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return new NextResponse("Erro interno do servidor", { status: 500 });
   }
 }
 
-// Esquema de validação para atualização de status
-const atualizarStatusSchema = z.object({
-  status: z.enum(["pendente", "em_andamento", "concluida", "atrasada", "cancelada"]),
-});
-
-// PATCH - Atualizar o status de uma tarefa
+// PATCH para atualizar apenas o status da tarefa
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verificar autenticação
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const contabilidadeId = Number(session.user.contabilidadeId);
     const tarefaId = Number(params.id);
+    const contabilidadeId = Number(session.user.contabilidadeId);
 
-    if (isNaN(tarefaId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
-
-    // Verificar se a tarefa existe e pertence a esta contabilidade
+    // Verificar se a tarefa existe e pertence à contabilidade do usuário
     const [tarefaExistente] = await db
-      .select({ id: tarefas.id })
+      .select()
       .from(tarefas)
       .where(
         and(
@@ -87,65 +81,70 @@ export async function PATCH(
       );
 
     if (!tarefaExistente) {
-      return NextResponse.json({ error: "Tarefa não encontrada" }, { status: 404 });
+      return new NextResponse("Tarefa não encontrada", { status: 404 });
     }
 
-    // Obter dados da requisição
     const body = await request.json();
-    
-    // Validar os dados
-    const validacao = atualizarStatusSchema.safeParse(body);
-    
-    if (!validacao.success) {
+    const validatedData = tarefaStatusSchema.safeParse(body);
+
+    if (!validatedData.success) {
       return NextResponse.json(
-        { error: "Dados inválidos", detalhes: validacao.error.format() },
+        { errors: validatedData.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
-    // Atualizar status da tarefa
+    const { status } = validatedData.data;
+    
+    // Se estiver marcando como concluída, adicionar a data de conclusão
+    const updateData: any = {
+      status,
+      dataAtualizacao: new Date(),
+    };
+    
+    if (status === "concluida" && tarefaExistente.status !== "concluida") {
+      updateData.dataConclusao = new Date();
+    } else if (status !== "concluida" && tarefaExistente.status === "concluida") {
+      // Se estiver mudando de concluída para outro status, remover a data de conclusão
+      updateData.dataConclusao = null;
+    }
+
+    // Atualizar a tarefa
     const [tarefaAtualizada] = await db
       .update(tarefas)
-      .set({
-        status: validacao.data.status,
-        dataConclusao: validacao.data.status === "concluida" ? new Date() : null,
-        dataAtualizacao: new Date(),
-      })
-      .where(eq(tarefas.id, tarefaId))
+      .set(updateData)
+      .where(
+        and(
+          eq(tarefas.id, tarefaId),
+          eq(tarefas.contabilidadeId, contabilidadeId)
+        )
+      )
       .returning();
 
     return NextResponse.json(tarefaAtualizada);
   } catch (error) {
     console.error("Erro ao atualizar status da tarefa:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return new NextResponse("Erro interno do servidor", { status: 500 });
   }
 }
 
-// PUT - Atualizar uma tarefa existente
+// PUT para atualizar outros campos da tarefa
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verificar autenticação
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    const contabilidadeId = Number(session.user.contabilidadeId);
     const tarefaId = Number(params.id);
+    const contabilidadeId = Number(session.user.contabilidadeId);
 
-    if (isNaN(tarefaId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
-
-    // Verificar se a tarefa existe e pertence a esta contabilidade
+    // Verificar se a tarefa existe e pertence à contabilidade do usuário
     const [tarefaExistente] = await db
-      .select({ id: tarefas.id })
+      .select()
       .from(tarefas)
       .where(
         and(
@@ -155,95 +154,52 @@ export async function PUT(
       );
 
     if (!tarefaExistente) {
-      return NextResponse.json({ error: "Tarefa não encontrada" }, { status: 404 });
+      return new NextResponse("Tarefa não encontrada", { status: 404 });
     }
 
-    // Obter dados da requisição
-    const tarefaData = await request.json();
+    const body = await request.json();
+    const validatedData = tarefaUpdateSchema.safeParse(body);
+
+    if (!validatedData.success) {
+      return NextResponse.json(
+        { errors: validatedData.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const updateData = {
+      ...validatedData.data,
+      dataAtualizacao: new Date(),
+    };
 
     // Converter IDs de string para número
-    if (tarefaData.clienteId && tarefaData.clienteId !== "0") {
-      tarefaData.clienteId = Number(tarefaData.clienteId);
-    } else {
-      tarefaData.clienteId = null;
+    if (updateData.responsavelId !== undefined) {
+      updateData.responsavelId = updateData.responsavelId === null 
+        ? null 
+        : Number(updateData.responsavelId);
     }
     
-    if (tarefaData.responsavelId && tarefaData.responsavelId !== "0") {
-      tarefaData.responsavelId = Number(tarefaData.responsavelId);
-    } else {
-      tarefaData.responsavelId = null;
+    if (updateData.clienteId !== undefined) {
+      updateData.clienteId = updateData.clienteId === null 
+        ? null 
+        : Number(updateData.clienteId);
     }
 
-    // Atualizar tarefa
+    // Atualizar a tarefa
     const [tarefaAtualizada] = await db
       .update(tarefas)
-      .set({
-        ...tarefaData,
-        dataConclusao: tarefaData.status === "concluida" ? new Date() : null,
-        dataAtualizacao: new Date(),
-      })
-      .where(eq(tarefas.id, tarefaId))
+      .set(updateData)
+      .where(
+        and(
+          eq(tarefas.id, tarefaId),
+          eq(tarefas.contabilidadeId, contabilidadeId)
+        )
+      )
       .returning();
 
     return NextResponse.json(tarefaAtualizada);
   } catch (error) {
     console.error("Erro ao atualizar tarefa:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
-  }
-}
-
-// DELETE - Remover tarefa (soft delete)
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    // Verificar autenticação
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const contabilidadeId = Number(session.user.contabilidadeId);
-    const tarefaId = Number(params.id);
-
-    if (isNaN(tarefaId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
-
-    // Verificar se a tarefa existe e pertence a esta contabilidade
-    const [tarefaExistente] = await db
-      .select({ id: tarefas.id })
-      .from(tarefas)
-      .where(
-        and(
-          eq(tarefas.id, tarefaId),
-          eq(tarefas.contabilidadeId, contabilidadeId)
-        )
-      );
-
-    if (!tarefaExistente) {
-      return NextResponse.json({ error: "Tarefa não encontrada" }, { status: 404 });
-    }
-
-    // Soft delete (apenas marcamos como inativo)
-    await db
-      .update(tarefas)
-      .set({
-        ativo: false,
-        dataAtualizacao: new Date(),
-      })
-      .where(eq(tarefas.id, tarefaId));
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Erro ao remover tarefa:", error);
-    return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
-    );
+    return new NextResponse("Erro interno do servidor", { status: 500 });
   }
 }

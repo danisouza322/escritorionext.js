@@ -99,6 +99,33 @@ export type Tarefa = {
   contabilidade?: Contabilidade;
   cliente?: Cliente | null;
   responsavel?: Usuario | null;
+  observacoes?: ObservacaoTarefa[];
+  arquivos?: ArquivoTarefa[];
+};
+
+export type ObservacaoTarefa = {
+  id: number;
+  tarefaId: number;
+  usuarioId: number;
+  texto: string;
+  ativo: boolean;
+  dataCriacao: Date;
+  dataAtualizacao: Date;
+  usuario?: Usuario;
+};
+
+export type ArquivoTarefa = {
+  id: number;
+  tarefaId: number;
+  usuarioId: number;
+  nome: string;
+  tipo?: string | null;
+  tamanho?: number | null;
+  caminho: string;
+  ativo: boolean;
+  dataCriacao: Date;
+  dataAtualizacao: Date;
+  usuario?: Usuario;
 };
 
 export type Session = {

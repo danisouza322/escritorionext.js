@@ -94,28 +94,37 @@ export default function TarefaList({ tarefas }: TarefaListProps) {
 
   // Botão de ação rápida com base no status
   const renderActionButton = (tarefa: Tarefa) => {
-    if (tarefa.status === "pendente") {
-      return (
+    return (
+      <div className="flex space-x-2 justify-end">
         <Button 
-          variant="outline" 
+          variant="default" 
           size="sm"
-          onClick={() => handleStatusChange(tarefa.id, "em_andamento")}
+          onClick={() => router.push(`/dashboard/tarefas/${tarefa.id}`)}
         >
-          Iniciar
+          Ver
         </Button>
-      );
-    } else if (tarefa.status === "em_andamento") {
-      return (
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => handleStatusChange(tarefa.id, "concluida")}
-        >
-          Concluir
-        </Button>
-      );
-    }
-    return null;
+        
+        {tarefa.status === "pendente" && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleStatusChange(tarefa.id, "em_andamento")}
+          >
+            Iniciar
+          </Button>
+        )}
+        
+        {tarefa.status === "em_andamento" && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleStatusChange(tarefa.id, "concluida")}
+          >
+            Concluir
+          </Button>
+        )}
+      </div>
+    );
   };
 
   return (

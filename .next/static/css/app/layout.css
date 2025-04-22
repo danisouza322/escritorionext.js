@@ -703,6 +703,9 @@ video {
 .col-span-2 {
   grid-column: span 2 / span 2;
 }
+.col-span-3 {
+  grid-column: span 3 / span 3;
+}
 .-mx-1 {
   margin-left: -0.25rem;
   margin-right: -0.25rem;
@@ -1086,8 +1089,19 @@ video {
 .overflow-y-auto {
   overflow-y: auto;
 }
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .whitespace-nowrap {
   white-space: nowrap;
+}
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+.rounded {
+  border-radius: 0.25rem;
 }
 .rounded-full {
   border-radius: 9999px;
@@ -1142,6 +1156,9 @@ video {
 }
 .bg-accent {
   background-color: hsl(var(--accent));
+}
+.bg-accent\/20 {
+  background-color: hsl(var(--accent) / 0.2);
 }
 .bg-background {
   background-color: hsl(var(--background));
@@ -1273,6 +1290,10 @@ video {
 .py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem;
+}
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 .pb-2 {
   padding-bottom: 0.5rem;
@@ -1570,6 +1591,10 @@ video {
 
 .hover\:bg-accent:hover {
   background-color: hsl(var(--accent));
+}
+
+.hover\:bg-accent\/50:hover {
+  background-color: hsl(var(--accent) / 0.5);
 }
 
 .hover\:bg-blue-500\/80:hover {
