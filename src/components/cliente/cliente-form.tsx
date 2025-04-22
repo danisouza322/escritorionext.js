@@ -414,7 +414,7 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
                         <FormLabel>Optante pelo Simples Nacional</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value || "nao"}
                         >
                           <FormControl>
                             <SelectTrigger>
