@@ -5,7 +5,9 @@ const nextConfig = {
     domains: ['localhost'],
   },
   experimental: {
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['localhost:5000', '*.replit.dev', '*.repl.co', '*.replit.app'],
+    },
   },
 };
 

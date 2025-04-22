@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContabilidadePRO - Sistema para Escritórios de Contabilidade</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fb;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #1e40af;
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+        }
+        
+        nav ul li {
+            margin-left: 20px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: #cbd5e1;
+        }
+        
+        .hero {
+            padding: 60px 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #1e40af;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #64748b;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #1e40af;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            background-color: #1e3a8a;
+        }
+        
+        .features {
+            padding: 60px 0;
+            background-color: white;
+        }
+        
+        .features h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2rem;
+            color: #1e40af;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-card h3 {
+            margin-top: 0;
+            color: #1e40af;
+            font-size: 1.5rem;
+        }
+        
+        .login-section {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 60px auto;
+        }
+        
+        .login-section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1e40af;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #475569;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 2px rgba(30,64,175,0.2);
+        }
+        
+        .btn-full {
+            width: 100%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        footer {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+            }
+            
+            nav ul {
+                margin-top: 20px;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">ContabilidadePRO</div>
+            <nav>
+                <ul>
+                    <li><a href="#">Início</a></li>
+                    <li><a href="#">Funcionalidades</a></li>
+                    <li><a href="#">Preços</a></li>
+                    <li><a href="#">Contato</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Solução Completa para Escritórios de Contabilidade</h1>
+                <p>Gerencie clientes, documentos, tarefas e colaboradores em uma única plataforma. Aumente a produtividade e qualidade do seu escritório contábil.</p>
+                <a href="#login" class="btn">Acessar o Sistema</a>
+            </div>
+        </section>
+        
+        <section class="features">
+            <div class="container">
+                <h2>Principais Funcionalidades</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>Gestão de Clientes</h3>
+                        <p>Cadastro completo com informações fiscais, contatos e histórico de atendimentos.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Gerenciamento de Documentos</h3>
+                        <p>Upload, categorização e compartilhamento seguro de documentos com seus clientes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Controle de Tarefas</h3>
+                        <p>Organize obrigações fiscais e contábeis com alertas de prazos e delegação para sua equipe.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Gestão de Colaboradores</h3>
+                        <p>Defina funções e permissões para cada membro da sua equipe.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Relatórios Gerenciais</h3>
+                        <p>Visualize o desempenho do escritório com gráficos e indicadores personalizados.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Área do Cliente</h3>
+                        <p>Portal exclusivo para seus clientes acessarem documentos e solicitarem serviços.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="login" class="login-section">
+            <h2>Acesso ao Sistema</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" placeholder="Seu e-mail" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" placeholder="Sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-full">Entrar</button>
+            </form>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 ContabilidadePRO. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Dados de login padrão para teste
+            if (email === 'admin@contabilidade.com' && password === '123456') {
+                alert('Login realizado com sucesso! Redirecionando para o painel...');
+                // Redirecionamento para página de dashboard
+                // window.location.href = '/dashboard';
+            } else {
+                alert('E-mail ou senha incorretos. Tente novamente.');
+            }
+        });
+    </script>
+</body>
+</html>
