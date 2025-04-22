@@ -10,6 +10,9 @@ export async function GET(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
+  // Await para os parâmetros - o Next.js 14 recomenda essa abordagem
+  const { params } = context;
+  
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -17,8 +20,8 @@ export async function GET(
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
-  // Acessar o ID a partir do contexto de forma segura
-  const id = Number(context.params.id);
+  // Acessar o ID a partir dos parâmetros de forma segura
+  const id = Number(params.id);
 
   if (isNaN(id)) {
     return NextResponse.json(
@@ -57,6 +60,9 @@ export async function DELETE(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
+  // Await para os parâmetros - o Next.js 14 recomenda essa abordagem
+  const { params } = context;
+  
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -64,8 +70,8 @@ export async function DELETE(
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
-  // Acessar o ID a partir do contexto de forma segura
-  const id = Number(context.params.id);
+  // Acessar o ID a partir dos parâmetros de forma segura
+  const id = Number(params.id);
 
   if (isNaN(id)) {
     return NextResponse.json(
