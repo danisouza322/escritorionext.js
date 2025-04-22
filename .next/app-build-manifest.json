@@ -6,11 +6,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
     "/dashboard/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -31,11 +26,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/clientes/[id]/page.js"
     ],
-    "/api/clientes/[id]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/clientes/[id]/route.js"
-    ],
     "/api/cnpja/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -46,10 +36,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/clientes/route.js"
     ],
-    "/dashboard/page": [
+    "/api/clientes/[id]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/page.js"
+      "static/chunks/app/api/clientes/[id]/route.js"
+    ],
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
     ]
   }
 }
