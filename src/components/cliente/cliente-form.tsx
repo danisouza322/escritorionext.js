@@ -131,6 +131,8 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
       
       const data = await response.json();
       
+      console.log('Dados recebidos do CNPJ:', data);
+      
       // Preencher os campos do formulário com os dados retornados
       form.setValue("nome", data.nome);
       form.setValue("email", data.email || "");
@@ -142,7 +144,10 @@ export default function ClienteForm({ children, cliente, onClose, onSuccess }: C
       form.setValue("data_abertura", data.data_abertura || "");
       form.setValue("natureza_juridica", data.natureza_juridica || "");
       form.setValue("atividade_principal", data.atividade_principal || "");
-      form.setValue("simples_nacional", data.simples_nacional || "nao");
+      
+      // Atualiza a seleção do Simples Nacional imediatamente no formulário
+      const simples = data.simples_nacional === 'sim' ? 'sim' : 'nao';
+      form.setValue("simples_nacional", simples);
       
       toast({
         title: "CNPJ Consultado",

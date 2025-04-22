@@ -1,6 +1,18 @@
 import { NextResponse } from 'next/server';
 
 /**
+ * Formata uma data no padrão brasileiro (dd/mm/aaaa)
+ */
+function formatarDataBR(dataStr: string): string {
+  try {
+    const data = new Date(dataStr);
+    return data.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+  } catch (e) {
+    return dataStr;
+  }
+}
+
+/**
  * API para consultar dados de empresas através do CNPJ utilizando a API CNPJA
  */
 export async function GET(request: Request) {
@@ -80,7 +92,7 @@ export async function GET(request: Request) {
       estado: data.address?.state || '',
       cep: data.address?.zip || '',
       status: data.status?.text || '',
-      data_abertura: data.founded || '',
+      data_abertura: data.founded ? formatarDataBR(data.founded) : '',
       natureza_juridica: data.legalNature?.text || '',
       atividade_principal: data.mainActivity?.text || '',
       atividades_secundarias: data.sideActivities?.map((activity: any) => activity.text).join(', ') || '',
