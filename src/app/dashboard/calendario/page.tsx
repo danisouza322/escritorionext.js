@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Calendar } from "@/components/ui/calendar";
+import { CalendarSimple } from "@/components/ui/calendar-simple";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tarefa } from "@/types";
 import { useSession } from "next-auth/react";
