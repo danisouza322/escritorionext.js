@@ -156,6 +156,7 @@ async function main() {
       tipo tipo_tarefa NOT NULL,
       status status_tarefa DEFAULT 'pendente',
       responsavel_id INTEGER REFERENCES usuarios(id),
+      criador_id INTEGER REFERENCES usuarios(id),
       data_vencimento TIMESTAMP,
       data_conclusao TIMESTAMP,
       prioridade INTEGER DEFAULT 0,
@@ -187,6 +188,14 @@ async function main() {
       ativo BOOLEAN DEFAULT TRUE,
       data_criacao TIMESTAMP DEFAULT NOW(),
       data_atualizacao TIMESTAMP DEFAULT NOW()
+    `);
+    
+    // Tabela de relacionamento muitos-para-muitos entre tarefas e responsáveis
+    await createTableIfNotExists(pool, 'tarefas_responsaveis', `
+      id SERIAL PRIMARY KEY,
+      tarefa_id INTEGER NOT NULL REFERENCES tarefas(id),
+      usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+      data_criacao TIMESTAMP DEFAULT NOW()
     `);
     
     // Adicionar colunas à tabela clientes se ela já existir
