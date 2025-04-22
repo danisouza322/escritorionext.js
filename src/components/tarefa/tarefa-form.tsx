@@ -129,7 +129,8 @@ export default function TarefaForm({
         ...data,
         // Converter "0" para null onde apropriado e string para number onde necessário
         clienteId: data.clienteId === "0" ? null : data.clienteId ? Number(data.clienteId) : null,
-        responsavelId: data.responsavelId === "0" ? null : data.responsavelId ? Number(data.responsavelId) : null,
+        // Usar o primeiro responsável como responsável principal, se existir
+        responsavelId: data.responsaveis.length > 0 ? Number(data.responsaveis[0]) : null,
         // Converter os IDs dos responsáveis para números
         responsaveis: data.responsaveis.map(id => Number(id)),
       };
@@ -239,7 +240,7 @@ export default function TarefaForm({
               )}
             />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="tipo"
@@ -337,39 +338,10 @@ export default function TarefaForm({
               
               <FormField
                 control={form.control}
-                name="responsavelId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Responsável Principal</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o responsável principal (opcional)" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="0">Sem responsável</SelectItem>
-                        {colaboradores.map((colaborador) => (
-                          <SelectItem key={colaborador.id} value={String(colaborador.id)}>
-                            {colaborador.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
                 name="responsaveis"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Responsáveis Adicionais</FormLabel>
+                    <FormLabel>Responsáveis</FormLabel>
                     <div className="space-y-2">
                       <div className="flex flex-wrap gap-2">
                         {field.value.map((userId, index) => {
