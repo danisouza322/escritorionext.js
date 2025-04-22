@@ -35,12 +35,23 @@ export function formataDocumento(documento: string, tipo: string) {
 export function formataData(data: Date | string) {
   if (!data) return "";
   
-  const date = new Date(data);
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
+  // Para evitar problemas de hidratação com SSR, vamos usar uma abordagem mais direta
+  try {
+    const date = new Date(data);
+    
+    // Verificar se é uma data válida
+    if (isNaN(date.getTime())) return "";
+    
+    // Forçar UTC para evitar diferenças entre servidor/cliente
+    const dia = String(date.getUTCDate()).padStart(2, '0');
+    const mes = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const ano = date.getUTCFullYear();
+    
+    return `${dia}/${mes}/${ano}`;
+  } catch (error) {
+    console.error("Erro ao formatar data:", error);
+    return "";
+  }
 }
 
 export function formataTelefone(telefone: string) {

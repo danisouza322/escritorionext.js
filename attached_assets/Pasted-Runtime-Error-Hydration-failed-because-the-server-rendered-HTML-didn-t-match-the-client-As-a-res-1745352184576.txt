@@ -1,0 +1,72 @@
+Runtime Error
+
+Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+
+
+  ...
+    <TarefasPage>
+      <div className="space-y-6">
+        <div>
+        <div>
+        <TarefaList tarefas={[...]}>
+          <div className="space-y-4">
+            <div>
+            <div className="border rou...">
+              <_c>
+                <div className="relative w...">
+                  <table ref={null} className="w-full cap...">
+                    <_c2>
+                    <_c4>
+                      <tbody ref={null} className={"[&_tr:la..."}>
+                        <_c8>
+                        <_c8>
+                          <tr ref={null} className="border-b t...">
+                            <_c12>
+                            <_c12>
+                            <_c12>
+                            <_c12>
+                            <_c12>
+                            <_c12 className="hidden md:...">
+                              <td ref={null} className={"p-4 alig..."}>
+                                <div className="flex items...">
+                                  <Calendar>
+                                  <span>
++                                   22/04/2025
+-                                   23/04/2025
+                            ...
+                        ...
+    ...
+src/components/tarefa/tarefa-list.tsx (197:25) @ eval
+
+
+  195 |                       <div className="flex items-center gap-1">
+  196 |                         <Calendar className="h-3 w-3" />
+> 197 |                         <span>{formataData(tarefa.dataVencimento)}</span>
+      |                         ^
+  198 |                       </div>
+  199 |                     ) : (
+  200 |                       "--"
+Call Stack
+16
+
+Show 11 ignore-listed frame(s)
+span
+<anonymous> (0:0)
+eval
+src/components/tarefa/tarefa-list.tsx (197:25)
+Array.map
+<anonymous> (0:0)
+TarefaList
+src/components/tarefa/tarefa-list.tsx (154:32)
+TarefasPage
+src/app/dashboard/tarefas/page.tsx (93:7)
