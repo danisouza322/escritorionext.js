@@ -41,6 +41,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Session } from "@/types";
 
 interface TarefaListProps {
   tarefas: Tarefa[];
@@ -50,6 +52,7 @@ export default function TarefaList({ tarefas }: TarefaListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const router = useRouter();
+  const { data: session } = useSession();
   
   // Filtrar tarefas com base no termo de busca
   const tarefasFiltradas = tarefas.filter((tarefa) => {
@@ -141,6 +144,9 @@ export default function TarefaList({ tarefas }: TarefaListProps) {
 
   // Botão de ação rápida com base no status
   const renderActionButton = (tarefa: Tarefa) => {
+    // Verificar se o usuário é o criador da tarefa
+    const isCreator = session?.user?.id && Number(session.user.id) === tarefa.criadorId;
+    
     return (
       <div className="flex space-x-2 justify-end">
         <Button 
@@ -171,39 +177,42 @@ export default function TarefaList({ tarefas }: TarefaListProps) {
           </Button>
         )}
         
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive/90"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Excluir tarefa</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tem certeza que deseja excluir esta tarefa?<br/>
-                <span className="font-medium">{tarefa.titulo}</span><br/>
-                <span className="text-xs text-muted-foreground mt-1">
-                  <Info className="h-3 w-3 inline-block mr-1" />
-                  Somente o criador da tarefa pode excluí-la.
-                </span>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => handleDelete(tarefa.id)}
+        {/* Mostrar botão de exclusão apenas se o usuário for o criador */}
+        {isCreator && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-destructive hover:text-destructive/90"
               >
-                Excluir
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir tarefa</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tem certeza que deseja excluir esta tarefa?<br/>
+                  <span className="font-medium">{tarefa.titulo}</span><br/>
+                  <span className="text-xs text-muted-foreground mt-1">
+                    <Info className="h-3 w-3 inline-block mr-1" />
+                    Somente o criador da tarefa pode excluí-la.
+                  </span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => handleDelete(tarefa.id)}
+                >
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     );
   };
