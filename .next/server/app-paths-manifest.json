@@ -1,7 +1,5 @@
 {
-  "/api/tarefas/[id]/observacoes/route": "app/api/tarefas/[id]/observacoes/route.js",
-  "/api/tarefas/[id]/arquivos/route": "app/api/tarefas/[id]/arquivos/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/page": "app/page.js",
-  "/dashboard/tarefas/[id]/page": "app/dashboard/tarefas/[id]/page.js"
+  "/dashboard/page": "app/dashboard/page.js"
 }
