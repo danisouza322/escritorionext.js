@@ -1,5 +1,39 @@
 # Alterações Recentes Implementadas
 
+## Data: 23/04/2025
+
+### Correções e Melhorias no Sistema de Tarefas
+
+#### Otimização da Interface
+1. **Links nos Títulos de Tarefas**
+   - Adicionados links nos títulos de tarefas na listagem para navegação direta
+   - Implementada navegação mais intuitiva com possibilidade de clicar no título ou no ícone
+   - Adicionada formatação visual (hover) para indicar que o título é clicável
+
+2. **Remoção de Mensagens Redundantes**
+   - Removido texto "Adicione um ou mais responsáveis pela tarefa" do formulário
+   - Interface mais limpa e focada nos campos essenciais
+
+3. **Posicionamento de Campos**
+   - Campo "Tarefa Recorrente" movido para ser a última opção no formulário
+   - Organização de layout com 3 inputs lado a lado para melhor visualização
+   - Aumentado o tamanho do modal para melhor visualização dos inputs
+
+#### Correção de Bugs
+1. **Erro de Criação de Tarefas**
+   - Corrigido erro "SyntaxError: No number after minus sign in JSON" ao criar tarefas
+   - Resolvida incompatibilidade de formatos entre o frontend e backend
+   - Implementada conversão adequada de tipos (string para number) nos campos numéricos
+   - Adicionado tratamento correto para campos opcionais (clienteId, responsáveis)
+
+2. **Erros em Componentes Select**
+   - Ajustados problemas com valores vazios no componente SelectItem
+   - Implementado valor padrão "0" para seleções vazias
+
+3. **Problemas de Carregamento**
+   - Corrigidos erros no componente LoadingSkeleton
+   - Otimizado carregamento progressivo para melhor experiência do usuário
+
 ## Data: 22/04/2025
 
 ### Gerenciamento de Clientes

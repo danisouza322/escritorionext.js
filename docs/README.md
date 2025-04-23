@@ -29,6 +29,8 @@ Este projeto inclui:
 - **DESENVOLVEDORES.md**: Guia técnico para desenvolvedores do módulo de tarefas
 - **MANUAL_USUARIO_TAREFAS.md**: Manual de uso das funcionalidades de tarefas
 - **CORRECOES_RESPONSAVEIS.md**: Detalhes sobre correções implementadas no sistema de responsáveis
+- **CORRECOES_ERROS_TAREFAS.md**: Resolução de problemas na criação de tarefas e conversão de tipos
+- **MELHORIAS_INTERFACE_TAREFAS.md**: Detalhes sobre as otimizações de interface do módulo de tarefas
 
 ## Instalação e Configuração
 

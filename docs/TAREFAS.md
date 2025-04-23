@@ -4,6 +4,22 @@
 
 O módulo de Tarefas é uma funcionalidade central do sistema de contabilidade que permite criar, visualizar, editar e gerenciar tarefas relacionadas a clientes e serviços contábeis. As tarefas podem ter múltiplos responsáveis, observações e arquivos anexos.
 
+## Atualizações Recentes (23/04/2025)
+
+### Melhorias de Interface
+- Adicionados links nos títulos das tarefas na listagem para navegação direta para a página de detalhes
+- Removido texto redundante "Adicione um ou mais responsáveis pela tarefa" no formulário
+- Reposicionado o campo "Tarefa Recorrente" para o final do formulário, seguindo a ordem lógica de preenchimento
+- Otimizado layout com 3 inputs lado a lado para melhor visualização e uso de espaço
+- Aumentado o tamanho do modal para melhor visualização dos campos
+
+### Correções de Bugs
+- Corrigido erro "SyntaxError: No number after minus sign in JSON" ao criar tarefas
+- Implementada conversão adequada entre tipos string e number nos campos de formulário
+- Padronizado o tratamento de campos opcionais e valores vazios
+- Corrigido problemas de compatibilidade nos esquemas de validação entre frontend e backend
+- Aprimorado tratamento de erros com mensagens mais claras
+
 ## Funcionalidades Implementadas
 
 ### 1. Listagem de Tarefas
