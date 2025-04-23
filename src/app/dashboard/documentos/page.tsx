@@ -9,7 +9,7 @@ import DocumentoList from "@/components/documento/documento-list";
 import UploadDocumento from "@/components/documento/upload-documento";
 import { FileUp } from "lucide-react";
 import { Suspense } from "react";
-import LoadingSkeleton from "@/components/ui/loading-skeleton";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 // Definir revalidação a cada 30 segundos para melhorar performance com cache
 export const revalidate = 60;
@@ -73,10 +73,10 @@ function DocumentosLoadingSkeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {[...Array(5)].map((_, index) => (
-          <LoadingSkeleton key={index} className="h-24 w-full" />
+          <LoadingSkeleton key={index} height="h-24" />
         ))}
       </div>
-      <LoadingSkeleton className="h-[400px] w-full" />
+      <LoadingSkeleton height="h-[400px]" />
     </div>
   );
 }

@@ -324,7 +324,7 @@ export default function TarefaForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Sem cliente</SelectItem>
+                        <SelectItem value="0">Sem cliente</SelectItem>
                         {clientes.map((cliente) => (
                           <SelectItem key={cliente.id} value={String(cliente.id)}>
                             {cliente.nome}
