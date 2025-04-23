@@ -144,24 +144,30 @@ export default function TarefaForm({
   // Submissão do formulário (otimizado)
   const onSubmit = useCallback(async (data: TarefaFormValues) => {
     setIsSubmitting(true);
+    console.log("Enviando dados:", data);
     
     try {
       // Vamos separar os dados em JSON para o endpoint principal
       // e posteriormente fazer upload de arquivos se necessário
       
       // Preparar dados para JSON
-      const jsonData = {
+      const jsonData: Record<string, any> = {
         titulo: data.titulo,
         tipo: data.tipo,
         status: data.status,
         descricao: data.descricao || '',
-        prioridade: data.prioridade,
+        prioridade: Number(data.prioridade), // Convertendo para número
         recorrente: data.recorrente,
       };
       
       // Cliente (opcional)
       if (data.clienteId) {
-        jsonData.clienteId = Number(data.clienteId);
+        // Tratando "0" como nulo (sem cliente)
+        if (data.clienteId === "0") {
+          jsonData.clienteId = null;
+        } else {
+          jsonData.clienteId = Number(data.clienteId);
+        }
       }
       
       // Data de vencimento (opcional)
@@ -177,6 +183,9 @@ export default function TarefaForm({
         
         // Converter para números
         jsonData.responsaveis = data.responsaveis.map(id => Number(id));
+      } else {
+        // Se não houver responsáveis, explicitamente definir arrays vazios
+        jsonData.responsaveis = [];
       }
       
       // Enviar dados JSON para a API
