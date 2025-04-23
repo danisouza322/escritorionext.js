@@ -31,6 +31,9 @@ Este projeto inclui:
 - **CORRECOES_RESPONSAVEIS.md**: Detalhes sobre correções implementadas no sistema de responsáveis
 - **CORRECOES_ERROS_TAREFAS.md**: Resolução de problemas na criação de tarefas e conversão de tipos
 - **MELHORIAS_INTERFACE_TAREFAS.md**: Detalhes sobre as otimizações de interface do módulo de tarefas
+- **PROXIMOS_PASSOS.md**: Análise completa com próximas etapas e correções necessárias
+- **CORRECAO_PARAMETROS_NEXTJS.md**: Guia para corrigir erros de parâmetros dinâmicos no Next.js 14
+- **CORRECAO_ERROS_TIPAGEM.md**: Soluções para os problemas de tipagem TypeScript identificados
 
 ## Instalação e Configuração
 
