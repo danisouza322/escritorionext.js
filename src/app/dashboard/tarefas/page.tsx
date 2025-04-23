@@ -5,9 +5,14 @@ import { db } from "@/lib/db";
 import { tarefas, usuarios, clientes, tarefasResponsaveis } from "@/db/schema";
 import { eq, desc, and, or, exists } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
-import TarefaList from "@/components/tarefa/tarefa-list";
-import TarefaForm from "@/components/tarefa/tarefa-form";
+import TarefaList from "@/components/tarefa-optimized/tarefa-list";
+import TarefaForm from "@/components/tarefa-optimized/tarefa-form";
 import { ListTodo } from "lucide-react";
+import { Suspense } from "react";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+
+// Definir revalidação a cada 30 segundos para melhorar performance com cache
+export const revalidate = 30;
 
 export default async function TarefasPage() {
   const session = await getServerSession(authOptions);
@@ -18,42 +23,9 @@ export default async function TarefasPage() {
 
   const contabilidadeId = Number(session.user.contabilidadeId);
   const usuarioId = Number(session.user.id);
-  
-  // Buscar tarefas onde o usuário é responsável principal OU está na lista de responsáveis adicionais OU é o criador
-  const tarefasList = await db.query.tarefas.findMany({
-    where: and(
-      eq(tarefas.contabilidadeId, contabilidadeId),
-      or(
-        eq(tarefas.responsavelId, usuarioId),
-        eq(tarefas.criadorId, usuarioId),
-        // Adiciona verificação na tabela de responsáveis
-        exists(
-          db.select()
-            .from(tarefasResponsaveis)
-            .where(
-              and(
-                eq(tarefasResponsaveis.tarefaId, tarefas.id),
-                eq(tarefasResponsaveis.usuarioId, usuarioId)
-              )
-            )
-        )
-      )
-    ),
-    orderBy: [desc(tarefas.dataCriacao)],
-    with: {
-      cliente: true,
-      responsavel: true,
-      criador: true,
-      responsaveis: {
-        with: {
-          usuario: true,
-        }
-      },
-    },
-  });
-  
-  // Buscar clientes ativos e colaboradores para o form
-  const clientesList = await db.query.clientes.findMany({
+
+  // Buscar clientes ativos e colaboradores para o form - sem await para carregar em paralelo
+  const clientesPromise = db.query.clientes.findMany({
     where: (fields, { eq, and }) => 
       and(
         eq(fields.contabilidadeId, contabilidadeId),
@@ -61,17 +33,50 @@ export default async function TarefasPage() {
       ),
   });
   
-  const colaboradores = await db.query.usuarios.findMany({
+  const colaboradoresPromise = db.query.usuarios.findMany({
     where: eq(usuarios.contabilidadeId, contabilidadeId),
   });
-  
-  // Contagem por status
-  const statusTarefas = tarefasList.reduce((acc, tarefa) => {
-    // Garantir que status nunca seja null ao acessar
-    const status = tarefa.status || 'pendente';
-    acc[status] = (acc[status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+
+  // Função para buscar tarefas de forma assíncrona
+  async function getTarefas() {
+    return await db.query.tarefas.findMany({
+      where: and(
+        eq(tarefas.contabilidadeId, contabilidadeId),
+        or(
+          eq(tarefas.responsavelId, usuarioId),
+          eq(tarefas.criadorId, usuarioId),
+          // Adiciona verificação na tabela de responsáveis
+          exists(
+            db.select()
+              .from(tarefasResponsaveis)
+              .where(
+                and(
+                  eq(tarefasResponsaveis.tarefaId, tarefas.id),
+                  eq(tarefasResponsaveis.usuarioId, usuarioId)
+                )
+              )
+          )
+        )
+      ),
+      orderBy: [desc(tarefas.dataCriacao)],
+      with: {
+        cliente: true,
+        responsavel: true,
+        criador: true,
+        responsaveis: {
+          with: {
+            usuario: true,
+          }
+        },
+      },
+    });
+  }
+
+  // Aguardar apenas os dados necessários para renderizar o form
+  const [clientesList, colaboradores] = await Promise.all([
+    clientesPromise,
+    colaboradoresPromise
+  ]);
 
   return (
     <div className="space-y-6">
@@ -93,6 +98,41 @@ export default async function TarefasPage() {
         </TarefaForm>
       </div>
       
+      <Suspense fallback={<TarefasLoadingSkeleton />}>
+        <TarefasContent getTarefas={getTarefas} />
+      </Suspense>
+    </div>
+  );
+}
+
+// Componente para mostrar esqueleto de carregamento
+function TarefasLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {[...Array(5)].map((_, index) => (
+          <LoadingSkeleton key={index} height="h-24" />
+        ))}
+      </div>
+      <LoadingSkeleton height="h-[400px]" />
+    </div>
+  );
+}
+
+// Componente de conteúdo separado para ser carregado de forma assíncrona
+async function TarefasContent({ getTarefas }: { getTarefas: () => Promise<any[]> }) {
+  const tarefasList = await getTarefas();
+  
+  // Contagem por status
+  const statusTarefas = tarefasList.reduce((acc, tarefa) => {
+    // Garantir que status nunca seja null ao acessar
+    const status = tarefa.status || 'pendente';
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return (
+    <>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-card border rounded-lg p-4 text-center">
           <span className="text-muted-foreground text-sm block">Total</span>
@@ -117,6 +157,6 @@ export default async function TarefasPage() {
       </div>
       
       <TarefaList tarefas={tarefasList as any} />
-    </div>
+    </>
   );
 }

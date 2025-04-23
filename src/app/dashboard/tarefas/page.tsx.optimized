@@ -1,0 +1,162 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { tarefas, usuarios, clientes, tarefasResponsaveis } from "@/db/schema";
+import { eq, desc, and, or, exists } from "drizzle-orm";
+import { Button } from "@/components/ui/button";
+import TarefaList from "@/components/tarefa/tarefa-list";
+import TarefaForm from "@/components/tarefa/tarefa-form";
+import { ListTodo } from "lucide-react";
+import { Suspense } from "react";
+import LoadingSkeleton from "@/components/ui/loading-skeleton";
+
+// Definir revalidação a cada 30 segundos para melhorar performance com cache
+export const revalidate = 30;
+
+export default async function TarefasPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/auth");
+  }
+
+  const contabilidadeId = Number(session.user.contabilidadeId);
+  const usuarioId = Number(session.user.id);
+
+  // Buscar clientes ativos e colaboradores para o form - sem await para carregar em paralelo
+  const clientesPromise = db.query.clientes.findMany({
+    where: (fields, { eq, and }) => 
+      and(
+        eq(fields.contabilidadeId, contabilidadeId),
+        eq(fields.ativo, true)
+      ),
+  });
+  
+  const colaboradoresPromise = db.query.usuarios.findMany({
+    where: eq(usuarios.contabilidadeId, contabilidadeId),
+  });
+
+  // Função para buscar tarefas de forma assíncrona
+  async function getTarefas() {
+    return await db.query.tarefas.findMany({
+      where: and(
+        eq(tarefas.contabilidadeId, contabilidadeId),
+        or(
+          eq(tarefas.responsavelId, usuarioId),
+          eq(tarefas.criadorId, usuarioId),
+          // Adiciona verificação na tabela de responsáveis
+          exists(
+            db.select()
+              .from(tarefasResponsaveis)
+              .where(
+                and(
+                  eq(tarefasResponsaveis.tarefaId, tarefas.id),
+                  eq(tarefasResponsaveis.usuarioId, usuarioId)
+                )
+              )
+          )
+        )
+      ),
+      orderBy: [desc(tarefas.dataCriacao)],
+      with: {
+        cliente: true,
+        responsavel: true,
+        criador: true,
+        responsaveis: {
+          with: {
+            usuario: true,
+          }
+        },
+      },
+    });
+  }
+
+  // Aguardar apenas os dados necessários para renderizar o form
+  const [clientesList, colaboradores] = await Promise.all([
+    clientesPromise,
+    colaboradoresPromise
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Tarefas</h1>
+          <span className="text-muted-foreground block">
+            Gerencie as tarefas e obrigações do escritório
+          </span>
+        </div>
+        <TarefaForm 
+          clientes={clientesList as any} 
+          colaboradores={colaboradores as any}
+        >
+          <Button className="gap-2">
+            <ListTodo className="h-4 w-4" />
+            Nova Tarefa
+          </Button>
+        </TarefaForm>
+      </div>
+      
+      <Suspense fallback={<TarefasLoadingSkeleton />}>
+        <TarefasContent getTarefas={getTarefas} />
+      </Suspense>
+    </div>
+  );
+}
+
+// Componente para mostrar esqueleto de carregamento
+function TarefasLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {[...Array(5)].map((_, index) => (
+          <LoadingSkeleton key={index} className="h-24 w-full" />
+        ))}
+      </div>
+      <LoadingSkeleton className="h-[400px] w-full" />
+    </div>
+  );
+}
+
+// Componente de conteúdo separado para ser carregado de forma assíncrona
+async function TarefasContent({ getTarefas }: { getTarefas: () => Promise<any[]> }) {
+  const tarefasList = await getTarefas();
+  
+  // Contagem por status
+  const statusTarefas = tarefasList.reduce((acc, tarefa) => {
+    // Garantir que status nunca seja null ao acessar
+    const status = tarefa.status || 'pendente';
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="bg-card border rounded-lg p-4 text-center">
+          <span className="text-muted-foreground text-sm block">Total</span>
+          <span className="text-3xl font-bold block">{tarefasList.length}</span>
+        </div>
+        <div className="bg-card border rounded-lg p-4 text-center">
+          <span className="text-muted-foreground text-sm block">Pendentes</span>
+          <span className="text-3xl font-bold block">{statusTarefas.pendente || 0}</span>
+        </div>
+        <div className="bg-card border rounded-lg p-4 text-center">
+          <span className="text-muted-foreground text-sm block">Em Andamento</span>
+          <span className="text-3xl font-bold block">{statusTarefas.em_andamento || 0}</span>
+        </div>
+        <div className="bg-card border rounded-lg p-4 text-center">
+          <span className="text-muted-foreground text-sm block">Concluídas</span>
+          <span className="text-3xl font-bold block">{statusTarefas.concluida || 0}</span>
+        </div>
+        <div className="bg-card border rounded-lg p-4 text-center">
+          <span className="text-muted-foreground text-sm block">Atrasadas</span>
+          <span className="text-3xl font-bold text-destructive block">{statusTarefas.atrasada || 0}</span>
+        </div>
+      </div>
+      
+      <TarefaList tarefas={tarefasList as any} />
+    </>
+  );
+}

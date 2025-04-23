@@ -1,0 +1,77 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { clientes as clientesTable } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { Button } from "@/components/ui/button";
+import ClienteList from "@/components/cliente-optimized/cliente-list";
+import ClienteForm from "@/components/cliente-optimized/cliente-form";
+import { UserPlus } from "lucide-react";
+import { Suspense } from "react";
+import LoadingSkeleton from "@/components/ui/loading-skeleton";
+
+// Defina revalidação para melhorar performance com cache
+export const revalidate = 60; // Revalida a cada 60 segundos
+
+export default async function ClientesPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/auth");
+  }
+
+  const contabilidadeId = Number(session.user.contabilidadeId);
+  
+  // Usando uma função separada para carregar os dados
+  // Isso é importante para usar com Suspense
+  async function getClientes() {
+    return await db.query.clientesTable.findMany({
+      where: eq(clientesTable.contabilidadeId, contabilidadeId),
+      orderBy: [desc(clientesTable.dataCriacao)],
+    });
+  }
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Clientes</h1>
+          <span className="text-muted-foreground block">
+            Gerencie os clientes da sua contabilidade
+          </span>
+        </div>
+        <ClienteForm>
+          <Button className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            Novo Cliente
+          </Button>
+        </ClienteForm>
+      </div>
+      
+      <Suspense fallback={<ClientesLoadingSkeleton />}>
+        <ClientesContent getClientes={getClientes} />
+      </Suspense>
+    </div>
+  );
+}
+
+// Componente para mostrar o esqueleto de carregamento
+function ClientesLoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-4" />
+        <LoadingSkeleton className="h-10 max-w-sm" />
+      </div>
+      <LoadingSkeleton className="h-[400px] w-full" />
+    </div>
+  );
+}
+
+// Componente de conteúdo separado para ser carregado de forma assíncrona
+async function ClientesContent({ getClientes }: { getClientes: () => Promise<any[]> }) {
+  const clientes = await getClientes();
+  
+  return <ClienteList clientes={clientes} />;
+}

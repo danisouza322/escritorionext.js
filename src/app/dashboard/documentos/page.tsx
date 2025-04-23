@@ -2,12 +2,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { documentos } from "@/db/schema";
+import { documentos, clientes } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
 import DocumentoList from "@/components/documento/documento-list";
 import UploadDocumento from "@/components/documento/upload-documento";
 import { FileUp } from "lucide-react";
+import { Suspense } from "react";
+import LoadingSkeleton from "@/components/ui/loading-skeleton";
+
+// Definir revalidação a cada 30 segundos para melhorar performance com cache
+export const revalidate = 60;
 
 export default async function DocumentosPage() {
   const session = await getServerSession(authOptions);
@@ -17,28 +22,27 @@ export default async function DocumentosPage() {
   }
 
   const contabilidadeId = Number(session.user.contabilidadeId);
-  
-  // Buscar documentos
-  const documentosList = await db.query.documentos.findMany({
-    where: eq(documentos.contabilidadeId, contabilidadeId),
-    orderBy: [desc(documentos.dataCriacao)],
-    with: {
-      cliente: true,
-      usuarioUpload: true,
-    },
-  });
-  
-  // Buscar clientes para o form de upload
-  const clientes = await db.query.clientes.findMany({
-    where: eq(documentos.contabilidadeId, contabilidadeId),
-  });
-  
-  // Contagem por tipo
-  const tiposDocumentos = documentosList.reduce((acc, doc) => {
-    acc[doc.tipo] = (acc[doc.tipo] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
 
+  // Função para buscar documentos de forma assíncrona para usar com Suspense
+  async function getDocumentos() {
+    return await db.query.documentos.findMany({
+      where: eq(documentos.contabilidadeId, contabilidadeId),
+      orderBy: [desc(documentos.dataCriacao)],
+      with: {
+        cliente: true,
+        usuarioUpload: true,
+      },
+    });
+  }
+  
+  // Buscar clientes para o form de upload - será usado diretamente no componente UploadDocumento
+  const clientesList = await db.query.clientes.findMany({
+    where: (fields, { eq, and }) => and(
+      eq(fields.contabilidadeId, contabilidadeId),
+      eq(fields.ativo, true)
+    ),
+  });
+  
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -48,7 +52,7 @@ export default async function DocumentosPage() {
             Gerencie todos os documentos do escritório
           </p>
         </div>
-        <UploadDocumento>
+        <UploadDocumento clienteId={undefined}>
           <Button className="gap-2">
             <FileUp className="h-4 w-4" />
             Novo Documento
@@ -56,6 +60,39 @@ export default async function DocumentosPage() {
         </UploadDocumento>
       </div>
       
+      <Suspense fallback={<DocumentosLoadingSkeleton />}>
+        <DocumentosContent getDocumentos={getDocumentos} />
+      </Suspense>
+    </div>
+  );
+}
+
+// Componente para mostrar esqueleto de carregamento
+function DocumentosLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {[...Array(5)].map((_, index) => (
+          <LoadingSkeleton key={index} className="h-24 w-full" />
+        ))}
+      </div>
+      <LoadingSkeleton className="h-[400px] w-full" />
+    </div>
+  );
+}
+
+// Componente de conteúdo separado para ser carregado de forma assíncrona
+async function DocumentosContent({ getDocumentos }: { getDocumentos: () => Promise<any[]> }) {
+  const documentosList = await getDocumentos();
+  
+  // Contagem por tipo
+  const tiposDocumentos = documentosList.reduce((acc, doc) => {
+    acc[doc.tipo] = (acc[doc.tipo] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return (
+    <>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-card border rounded-lg p-4 text-center">
           <p className="text-muted-foreground text-sm">Total</p>
@@ -80,6 +117,6 @@ export default async function DocumentosPage() {
       </div>
       
       <DocumentoList documentos={documentosList} />
-    </div>
+    </>
   );
 }

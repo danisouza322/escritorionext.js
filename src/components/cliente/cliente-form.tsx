@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -80,6 +80,14 @@ export default function ClienteForm({
   const [isConsultandoCNPJ, setIsConsultandoCNPJ] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+
+  // Pré-carregamento de dados para melhorar performance
+  useEffect(() => {
+    // Otimização: Prefetch api para tornar o acesso mais rápido
+    if (!embedded) {
+      fetch("/api/clientes?limit=5").catch(() => {});
+    }
+  }, [embedded]);
 
   // Valor inicial do formulário
   const defaultValues: Partial<ClienteFormValues> = cliente
