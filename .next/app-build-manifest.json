@@ -26,15 +26,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/auth/[...nextauth]/route.js"
     ],
-    "/api/tarefas/route": [
+    "/dashboard/documentos/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/tarefas/route.js"
-    ],
-    "/api/clientes/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/clientes/route.js"
+      "static/chunks/app/dashboard/documentos/page.js"
     ]
   }
 }

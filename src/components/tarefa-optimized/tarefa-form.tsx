@@ -146,48 +146,46 @@ export default function TarefaForm({
     setIsSubmitting(true);
     
     try {
-      // Reorganizando dados para tratar os responsáveis corretamente
-      const formData = new FormData();
+      // Vamos separar os dados em JSON para o endpoint principal
+      // e posteriormente fazer upload de arquivos se necessário
       
-      // Adicionar campos básicos
-      formData.append('titulo', data.titulo);
-      formData.append('tipo', data.tipo);
-      formData.append('status', data.status);
-      formData.append('descricao', data.descricao || '');
-      formData.append('prioridade', data.prioridade);
-      formData.append('recorrente', String(data.recorrente));
+      // Preparar dados para JSON
+      const jsonData = {
+        titulo: data.titulo,
+        tipo: data.tipo,
+        status: data.status,
+        descricao: data.descricao || '',
+        prioridade: data.prioridade,
+        recorrente: data.recorrente,
+      };
       
       // Cliente (opcional)
       if (data.clienteId) {
-        formData.append('clienteId', data.clienteId);
+        jsonData.clienteId = Number(data.clienteId);
       }
       
       // Data de vencimento (opcional)
       if (data.dataVencimento) {
-        formData.append('dataVencimento', data.dataVencimento);
+        jsonData.dataVencimento = data.dataVencimento;
       }
       
       // Responsáveis - preservando o responsavelId para compatibilidade
       // e adicionando os novos responsáveis
       if (data.responsaveis.length > 0) {
         // O primeiro responsável da lista se torna o principal
-        formData.append('responsavelId', data.responsaveis[0]);
+        jsonData.responsavelId = Number(data.responsaveis[0]);
         
-        // Adicionar todos os responsáveis selecionados
-        data.responsaveis.forEach((respId, index) => {
-          formData.append(`responsaveis[${index}]`, respId);
-        });
+        // Converter para números
+        jsonData.responsaveis = data.responsaveis.map(id => Number(id));
       }
       
-      // Adicionar arquivos, se houver
-      data.arquivos.forEach((file, index) => {
-        formData.append(`arquivos`, file);
-      });
-
-      // Enviar para a API
+      // Enviar dados JSON para a API
       const response = await fetch('/api/tarefas', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jsonData),
       });
       
       if (!response.ok) {
