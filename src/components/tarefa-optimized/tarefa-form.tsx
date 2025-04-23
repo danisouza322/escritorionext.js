@@ -392,9 +392,6 @@ export default function TarefaForm({
                     </div>
                     
                     <FormMessage />
-                    <FormDescription>
-                      Adicione um ou mais responsáveis pela tarefa
-                    </FormDescription>
                   </FormItem>
                 )}
               />

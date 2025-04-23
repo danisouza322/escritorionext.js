@@ -252,9 +252,15 @@ export default function TarefaList({ tarefas: tarefasIniciais }: TarefaListProps
             ) : (
               tarefasFiltradas.map((tarefa) => (
                 <TableRow key={tarefa.id}>
-                  <TableCell className="font-medium">
+                  <TableCell>
                     <div className="flex flex-col">
-                      <span>{tarefa.titulo}</span>
+                      <Link 
+                        href={`/dashboard/tarefas/${tarefa.id}`}
+                        className="font-medium hover:underline hover:text-primary transition-colors"
+                        prefetch={false}
+                      >
+                        {tarefa.titulo}
+                      </Link>
                       <span className="text-xs text-muted-foreground">
                         {getTipoTarefaLabel(tarefa.tipo)}
                       </span>

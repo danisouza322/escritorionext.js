@@ -16,60 +16,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/layout.js"
     ],
-    "/dashboard/page": [
+    "/dashboard/tarefas/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/page.js"
+      "static/chunks/app/dashboard/tarefas/page.js"
     ],
     "/api/auth/[...nextauth]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/auth/[...nextauth]/route.js"
     ],
-    "/dashboard/clientes/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/clientes/page.js"
-    ],
-    "/dashboard/documentos/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/documentos/page.js"
-    ],
-    "/api/clientes/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/clientes/route.js"
-    ],
-    "/api/clientes/[id]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/clientes/[id]/route.js"
-    ],
-    "/dashboard/tarefas/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/tarefas/page.js"
-    ],
     "/api/tarefas/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/tarefas/route.js"
     ],
-    "/dashboard/tarefas/[id]/page": [
+    "/api/clientes/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/tarefas/[id]/page.js"
-    ],
-    "/api/tarefas/[id]/observacoes/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/tarefas/[id]/observacoes/route.js"
-    ],
-    "/api/tarefas/[id]/arquivos/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/tarefas/[id]/arquivos/route.js"
+      "static/chunks/app/api/clientes/route.js"
     ]
   }
 }
