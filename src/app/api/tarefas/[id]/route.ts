@@ -253,8 +253,41 @@ export async function DELETE(
         { status: 403 }
       );
     }
+    
+    // 3. Buscar e excluir arquivos físicos relacionados
+    const arquivos = await db
+      .select()
+      .from(arquivosTarefas)
+      .where(eq(arquivosTarefas.tarefaId, tarefaId));
+    
+    if (arquivos.length > 0) {
+      // Importar funções necessárias para manipulação de arquivos
+      const { join } = await import("path");
+      const { unlink } = await import("fs/promises");
+      const { existsSync } = await import("fs");
+      
+      const UPLOAD_DIR = join(process.cwd(), "public");
+      
+      // Tentar excluir cada arquivo físico
+      for (const arquivo of arquivos) {
+        try {
+          const filePath = join(UPLOAD_DIR, arquivo.caminho);
+          console.log(`Tentando excluir arquivo físico: ${filePath}`);
+          
+          if (existsSync(filePath)) {
+            await unlink(filePath);
+            console.log(`Arquivo físico excluído: ${filePath}`);
+          } else {
+            console.log(`Arquivo físico não encontrado: ${filePath}`);
+          }
+        } catch (fileError) {
+          console.error(`Erro ao excluir arquivo físico: ${arquivo.caminho}`, fileError);
+          // Continuar mesmo se houver erro na exclusão de um arquivo
+        }
+      }
+    }
 
-    // Excluir registros relacionados
+    // Excluir registros relacionados em ordem
     // 1. Excluir responsáveis relacionados
     await db
       .delete(tarefasResponsaveis)
@@ -265,7 +298,7 @@ export async function DELETE(
       .delete(observacoesTarefas)
       .where(eq(observacoesTarefas.tarefaId, tarefaId));
 
-    // 3. Excluir arquivos relacionados
+    // 3. Excluir arquivos do banco
     await db
       .delete(arquivosTarefas)
       .where(eq(arquivosTarefas.tarefaId, tarefaId));

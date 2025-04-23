@@ -6,7 +6,8 @@ import { tarefas, arquivosTarefas } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { join } from "path";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
+import { existsSync } from "fs";
 
 // Diretório para salvar os arquivos
 const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "tarefas");
@@ -72,14 +73,34 @@ export async function DELETE(
       return new NextResponse("Você não tem permissão para excluir este arquivo", { status: 403 });
     }
 
-    // Excluir o arquivo (usando exclusão lógica, apenas marcando como inativo)
-    await db
-      .update(arquivosTarefas)
-      .set({ 
-        ativo: false,
-        dataAtualizacao: new Date() 
-      })
-      .where(eq(arquivosTarefas.id, parseInt(arquivoId, 10)));
+    // Primeiro registrar o arquivo para remoção
+    console.log("Excluindo arquivo:", arquivo.id);
+    console.log("Dados da tarefa:", tarefa);
+
+    try {
+      // Remover o arquivo físico do sistema
+      const filePath = join(process.cwd(), "public", arquivo.caminho);
+      if (existsSync(filePath)) {
+        await unlink(filePath);
+      }
+      
+      // Remover completamente do banco de dados
+      await db
+        .delete(arquivosTarefas)
+        .where(eq(arquivosTarefas.id, parseInt(arquivoId, 10)));
+      
+      console.log("Arquivo excluído com sucesso");
+    } catch (fileError) {
+      console.error("Erro ao excluir arquivo físico:", fileError);
+      // Se falhar ao excluir o arquivo físico, pelo menos marca como inativo no banco
+      await db
+        .update(arquivosTarefas)
+        .set({ 
+          ativo: false,
+          dataAtualizacao: new Date() 
+        })
+        .where(eq(arquivosTarefas.id, parseInt(arquivoId, 10)));
+    }
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
