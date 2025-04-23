@@ -8,6 +8,11 @@ import ClienteList from "@/components/cliente/cliente-list";
 import { Cliente } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Suspense } from "react";
+import { CardSkeleton, LoadingSkeleton, TableSkeleton } from "@/components/ui/loading-skeleton";
+
+// Revalidar a cada 60 segundos
+export const revalidate = 60;
 
 export default async function ClientesPage() {
   const session = await getServerSession(authOptions);
@@ -50,22 +55,30 @@ export default async function ClientesPage() {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">Total de Clientes</p>
-          <p className="text-3xl font-bold">{clientesList.length}</p>
+      <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-card border rounded-lg p-4 text-center">
+            <p className="text-muted-foreground text-sm">Total de Clientes</p>
+            <p className="text-3xl font-bold">{clientesList.length}</p>
+          </div>
+          <div className="bg-card border rounded-lg p-4 text-center">
+            <p className="text-muted-foreground text-sm">Pessoas Físicas</p>
+            <p className="text-3xl font-bold">{pessoasFisicas}</p>
+          </div>
+          <div className="bg-card border rounded-lg p-4 text-center">
+            <p className="text-muted-foreground text-sm">Pessoas Jurídicas</p>
+            <p className="text-3xl font-bold">{pessoasJuridicas}</p>
+          </div>
         </div>
-        <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">Pessoas Físicas</p>
-          <p className="text-3xl font-bold">{pessoasFisicas}</p>
-        </div>
-        <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">Pessoas Jurídicas</p>
-          <p className="text-3xl font-bold">{pessoasJuridicas}</p>
-        </div>
-      </div>
+      </Suspense>
       
-      <ClienteList clientes={clientesList as Cliente[]} />
+      <Suspense fallback={<TableSkeleton />}>
+        <ClienteList clientes={clientesList as Cliente[]} />
+      </Suspense>
     </div>
   );
 }

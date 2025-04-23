@@ -8,6 +8,11 @@ import CalendarOverview from "@/components/dashboard/calendar-overview";
 import { db } from "@/lib/db";
 import { tarefas, clientes, documentos } from "@/db/schema";
 import { eq, desc, and, lte, gte } from "drizzle-orm";
+import { Suspense } from "react";
+import { CardSkeleton, LoadingSkeleton, TableSkeleton } from "@/components/ui/loading-skeleton";
+
+// Revalidar a cada 30 segundos
+export const revalidate = 30;
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -95,19 +100,27 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
       
-      <StatsCards 
-        totalClientes={totalClientes}
-        totalDocumentos={totalDocumentos}
-        tarefasEmAberto={tarefasEmAberto}
-        tarefasAtrasadas={tarefasAtrasadas}
-      />
+      <Suspense fallback={<CardSkeleton />}>
+        <StatsCards 
+          totalClientes={totalClientes}
+          totalDocumentos={totalDocumentos}
+          tarefasEmAberto={tarefasEmAberto}
+          tarefasAtrasadas={tarefasAtrasadas}
+        />
+      </Suspense>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentTasks tarefas={tarefasRecentes} />
-        <ClientOverview clientes={clientesRecentes} />
+        <Suspense fallback={<LoadingSkeleton height="h-80" />}>
+          <RecentTasks tarefas={tarefasRecentes} />
+        </Suspense>
+        <Suspense fallback={<LoadingSkeleton height="h-80" />}>
+          <ClientOverview clientes={clientesRecentes} />
+        </Suspense>
       </div>
       
-      <CalendarOverview tarefas={proximasTarefas} />
+      <Suspense fallback={<LoadingSkeleton height="h-96" />}>
+        <CalendarOverview tarefas={proximasTarefas} />
+      </Suspense>
     </div>
   );
 }
