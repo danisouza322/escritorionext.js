@@ -1,4 +1,18 @@
-.next/**
-node_modules/**
-.env*
-!.env.example
+# Node
+node_modules/
+
+# Next.js
+.next/
+
+# Ambiente
+.env
+.env.*
+
+# Logs
+*.log
+
+# Outros
+.DS_Store
+.vscode/
+.idea/
+*.swp
