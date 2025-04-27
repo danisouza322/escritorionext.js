@@ -1,61 +1,50 @@
-# Sistema de Gestão para Escritório de Contabilidade
+# ContabilidadePRO - Atualização de Perfil e Avatar
 
-Aplicação SaaS empresarial para escritórios de contabilidade, focada em automação e integração de processos contábeis com tecnologias modernas e fluxo de trabalho otimizado.
+## Funcionalidade: Edição de Perfil do Usuário
 
-## Principais Recursos
+### Fluxo Implementado
 
-- **Gestão de Clientes**: Cadastro, consulta, edição e remoção de clientes com integração da API CNPJA para preenchimento automático
-- **Gestão de Documentos**: Upload, compartilhamento e organização de documentos por cliente
-- **Gestão de Tarefas**: Acompanhamento de tarefas com priorização e atribuição a múltiplos colaboradores
-- **Dashboard**: Visualização consolidada de estatísticas e atividades recentes
-- **Colaboradores**: Gerenciamento de usuários da contabilidade com diferentes níveis de acesso
+- O usuário pode editar seu nome e foto de perfil na rota `/dashboard/perfil`.
+- O upload da foto é feito via formulário, com preview imediato.
+- Após salvar, a foto é persistida no banco (campo `fotoPerfil` na tabela `usuarios`).
+- O backend e a sessão do NextAuth propagam o campo `fotoPerfil` para o frontend.
+- O avatar do header exibe a foto de perfil imediatamente após o upload, sem necessidade de logout ou reload manual.
 
-## Tecnologias Utilizadas
+### Arquitetura
 
-- **Frontend**: Next.js 14, React, TailwindCSS, shadcn/ui, React Hook Form, Zod
-- **Backend**: API Routes no Next.js, NextAuth.js para autenticação
-- **Banco de Dados**: PostgreSQL com Drizzle ORM
-- **Integrações**: API CNPJA para consulta de dados empresariais
+- **Contexto Global de Usuário (`UserContext`)**: Garante atualização instantânea do avatar em toda a aplicação.
+- **Atualização da Sessão**: O formulário chama `useSession().update()` e também atualiza o contexto global com a nova URL da foto.
+- **Fallback**: Se o usuário não tiver foto, o avatar exibe a inicial do nome.
 
-## Documentação
+### Principais Arquivos
 
-Toda a documentação está disponível na pasta `docs/`:
+- `src/components/perfil/perfil-form.tsx`: Formulário de edição de perfil, upload de foto e atualização do contexto global.
+- `src/components/user-dropdown.tsx`: Avatar do usuário, consumindo o contexto global.
+- `src/context/UserContext.tsx`: Contexto global de usuário.
+- `src/app/dashboard/layout.tsx`: Envolve o dashboard com o provider do contexto global.
+- `src/lib/auth.ts`: Propagação do campo `fotoPerfil` na sessão do NextAuth.
+- `src/app/api/usuario/perfil/route.ts`: Endpoint para atualização de nome e foto de perfil.
 
-- **[README.md](docs/README.md)**: Visão geral do projeto e referências a outros documentos
-- **[DOCUMENTACAO-TECNICA.md](docs/DOCUMENTACAO-TECNICA.md)**: Detalhes sobre a implementação, arquitetura e padrões de código
-- **[GUIA-CLIENTES.md](docs/GUIA-CLIENTES.md)**: Documentação específica do módulo de clientes
-- **[TAREFAS.md](docs/TAREFAS.md)**: Documentação completa do módulo de tarefas
-- **[DESENVOLVEDORES.md](docs/DESENVOLVEDORES.md)**: Guia técnico para desenvolvedores
-- **[MANUAL_USUARIO_TAREFAS.md](docs/MANUAL_USUARIO_TAREFAS.md)**: Manual de uso para usuários finais
-- **[ALTERACOES-RECENTES.md](docs/ALTERACOES-RECENTES.md)**: Histórico de atualizações e melhorias
-- **[CODIGOS-IMPLEMENTADOS.md](docs/CODIGOS-IMPLEMENTADOS.md)**: Exemplos de código importantes
-- **[CORRECOES_RESPONSAVEIS.md](docs/CORRECOES_RESPONSAVEIS.md)**: Detalhes sobre correções no sistema de responsáveis
+### Observações
 
-## Instalação e Configuração
+- O campo `fotoPerfil` deve estar presente no banco e na sessão.
+- O contexto global é atualizado após o upload, garantindo UX instantânea.
+- O avatar nunca fica desatualizado após alteração de foto.
 
-```bash
-# Instalar dependências
-npm install
+---
 
-# Variáveis de ambiente necessárias
-# Crie um arquivo .env com:
-NEXTAUTH_SECRET=sua_chave_secreta_aqui
-NEXTAUTH_URL=http://localhost:3000
-DATABASE_URL=sua_url_do_postgres
-CNPJA_API_KEY=sua_chave_api_cnpja
+## Como funciona o fluxo de atualização do avatar?
 
-# Iniciar o servidor de desenvolvimento
-npm run dev
-```
+1. O usuário faz upload de uma nova foto em `/dashboard/perfil`.
+2. O backend salva a foto e retorna a URL.
+3. O formulário atualiza a sessão e o contexto global com a nova URL.
+4. O avatar consome o contexto e exibe a nova foto imediatamente.
+5. Se não houver foto, exibe a inicial do nome.
 
-## Desenvolvimento
+---
 
-O projeto segue uma estrutura de diretórios organizada:
+## Manutenção
 
-- `/src/app`: Rotas e estrutura principal do Next.js
-- `/src/components`: Componentes React reutilizáveis
-- `/src/db`: Esquema do banco de dados
-- `/src/lib`: Utilitários e configurações
-- `/src/hooks`: Hooks personalizados
-- `/src/types`: Definições de tipos TypeScript
-- `/docs`: Documentação completa do projeto
+- Para alterar o comportamento do avatar, edite `user-dropdown.tsx`.
+- Para alterar o fluxo de atualização, edite `perfil-form.tsx` e `UserContext.tsx`.
+- Para garantir que o campo `fotoPerfil` está sempre atualizado, mantenha a lógica de update no backend e na sessão.
